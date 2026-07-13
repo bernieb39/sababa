@@ -1,0 +1,1217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>סבבה! · Hebrew Adventure</title>
+</head>
+<body>
+<title>סבבה! · Hebrew Adventure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+/* ============ tokens ============ */
+:root{
+  --bg:#FFF6F0; --bg2:#FFEDE4; --card:#FFFFFF; --ink:#2B2140; --muted:#8A7F9F;
+  --accent:#FF4D6D; --accent-soft:#FFE1E7; --teal:#0FB5A6; --teal-soft:#D8F5F1;
+  --sun:#FFC53D; --sun-soft:#FFF1CC; --lilac:#8B7BD8; --lilac-soft:#EAE5FB;
+  --edge:#2B2140; --shadow:3px 4px 0 rgba(43,33,64,.16);
+  --good:#18A860; --bad:#E5484D;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#171129; --bg2:#1F1738; --card:#251C44; --ink:#F4EFFF; --muted:#A99CC9;
+    --accent:#FF5C7A; --accent-soft:#4A2338; --teal:#22CBBB; --teal-soft:#173D3B;
+    --sun:#FFCE52; --sun-soft:#42361A; --lilac:#A091E8; --lilac-soft:#2E2554;
+    --edge:#0E0A1E; --shadow:3px 4px 0 rgba(0,0,0,.45);
+    --good:#2FC776; --bad:#FF6B6E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171129; --bg2:#1F1738; --card:#251C44; --ink:#F4EFFF; --muted:#A99CC9;
+  --accent:#FF5C7A; --accent-soft:#4A2338; --teal:#22CBBB; --teal-soft:#173D3B;
+  --sun:#FFCE52; --sun-soft:#42361A; --lilac:#A091E8; --lilac-soft:#2E2554;
+  --edge:#0E0A1E; --shadow:3px 4px 0 rgba(0,0,0,.45);
+  --good:#2FC776; --bad:#FF6B6E;
+}
+:root[data-theme="light"]{
+  --bg:#FFF6F0; --bg2:#FFEDE4; --card:#FFFFFF; --ink:#2B2140; --muted:#8A7F9F;
+  --accent:#FF4D6D; --accent-soft:#FFE1E7; --teal:#0FB5A6; --teal-soft:#D8F5F1;
+  --sun:#FFC53D; --sun-soft:#FFF1CC; --lilac:#8B7BD8; --lilac-soft:#EAE5FB;
+  --edge:#2B2140; --shadow:3px 4px 0 rgba(43,33,64,.16);
+  --good:#18A860; --bad:#E5484D;
+}
+
+/* ============ base ============ */
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; padding:0}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(circle at 15% 8%, var(--bg2) 0, transparent 45%),
+                   radial-gradient(circle at 90% 92%, var(--bg2) 0, transparent 40%);
+  color:var(--ink);
+  font-family:ui-rounded,"SF Pro Rounded","Varela Round",Quicksand,system-ui,"Segoe UI",sans-serif;
+  min-height:100dvh;
+}
+button{font:inherit; color:inherit; cursor:pointer}
+#app{max-width:460px; margin:0 auto; padding:14px 14px 96px; min-height:100dvh}
+
+.he{direction:rtl; unicode-bidi:isolate}
+.big-he{font-size:1.9rem; font-weight:800; line-height:1.35}
+
+/* ============ top bar ============ */
+#topbar{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+#topbar .brand{font-weight:900; font-size:1.15rem; letter-spacing:.02em; transform:rotate(-2deg);
+  background:var(--accent); color:#fff; padding:4px 12px; border-radius:12px;
+  border:2px solid var(--edge); box-shadow:var(--shadow)}
+.statchip{display:flex; align-items:center; gap:5px; font-weight:800; font-size:.85rem;
+  background:var(--card); border:2px solid var(--edge); border-radius:12px; padding:4px 9px; box-shadow:var(--shadow)}
+#xpwrap{flex:1; min-width:60px}
+#xpbar{height:14px; background:var(--card); border:2px solid var(--edge); border-radius:10px; overflow:hidden; box-shadow:var(--shadow)}
+#xpfill{height:100%; width:0%; background:linear-gradient(90deg,var(--sun),var(--accent)); transition:width .5s ease}
+#lvlname{font-size:.7rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; text-align:center}
+
+/* ============ cards & buttons ============ */
+.card{background:var(--card); border:2px solid var(--edge); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:16px; margin-bottom:14px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--card); border:2px solid var(--edge); border-radius:14px;
+  box-shadow:var(--shadow); padding:11px 18px; font-weight:800; font-size:1rem;
+  transition:transform .08s ease}
+.btn:active{transform:translate(2px,3px); box-shadow:0 0 0 rgba(0,0,0,0)}
+.btn.primary{background:var(--accent); color:#fff}
+.btn.teal{background:var(--teal); color:#fff}
+.btn.sun{background:var(--sun); color:#3A2E00}
+.btn.ghost{box-shadow:none; border-color:transparent; background:transparent; color:var(--muted)}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45; cursor:default}
+.btn:focus-visible,.tab:focus-visible{outline:3px solid var(--teal); outline-offset:2px}
+
+h1{font-size:1.5rem; margin:.2em 0 .4em; font-weight:900; text-wrap:balance}
+h2{font-size:1.15rem; margin:.2em 0 .5em; font-weight:900}
+.eyebrow{font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
+.small{font-size:.85rem; color:var(--muted)}
+
+/* ============ tab bar ============ */
+#tabbar{position:fixed; bottom:0; left:0; right:0; z-index:40;
+  display:flex; justify-content:center; padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  pointer-events:none}
+#tabbar .rail{pointer-events:auto; display:flex; gap:6px; background:var(--card);
+  border:2px solid var(--edge); border-radius:20px; box-shadow:var(--shadow); padding:6px}
+.tab{display:flex; flex-direction:column; align-items:center; gap:1px; border:none; background:transparent;
+  border-radius:14px; padding:6px 13px; font-weight:800; font-size:.68rem; color:var(--muted)}
+.tab .ico{font-size:1.25rem; line-height:1}
+.tab.active{background:var(--accent-soft); color:var(--accent)}
+
+/* ============ home ============ */
+#mascot-row{display:flex; align-items:center; gap:14px}
+#mascot{width:86px; height:86px; flex:none; animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@media (prefers-reduced-motion: reduce){ #mascot{animation:none} *{transition:none!important} }
+.bubble{position:relative; background:var(--card); border:2px solid var(--edge); border-radius:16px;
+  box-shadow:var(--shadow); padding:10px 14px; font-weight:700}
+.quest{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:2px dashed var(--lilac-soft)}
+.quest:last-child{border-bottom:none}
+.quest .qico{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:1.2rem;
+  background:var(--lilac-soft); border-radius:12px}
+.quest.done .qico{background:var(--teal-soft)}
+.quest .qtxt{flex:1; font-weight:700; font-size:.92rem}
+.quest .qprog{font-weight:900; font-size:.85rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.quest.done .qprog{color:var(--good)}
+
+/* ============ pack grid ============ */
+.packgrid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.pack{border:2px solid var(--edge); border-radius:var(--r); box-shadow:var(--shadow);
+  background:var(--card); padding:14px 12px; text-align:center; display:flex; flex-direction:column; gap:6px; align-items:center}
+.pack .pico{font-size:1.9rem}
+.pack .pname{font-weight:900; font-size:1.05rem}
+.pack .pen{font-size:.72rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em}
+.meter{width:100%; height:9px; background:var(--lilac-soft); border-radius:6px; overflow:hidden}
+.meter i{display:block; height:100%; background:var(--teal); border-radius:6px}
+
+/* ============ exercise ============ */
+.prompt-card{text-align:center; padding:26px 16px}
+.opts{display:flex; flex-direction:column; gap:10px; margin-top:14px}
+.opt{text-align:center; font-size:1.05rem; font-weight:800; padding:13px; border-radius:14px;
+  border:2px solid var(--edge); background:var(--card); box-shadow:var(--shadow); transition:transform .08s}
+.opt:active{transform:translate(2px,3px); box-shadow:none}
+.opt.correct{background:var(--good); color:#fff}
+.opt.wrong{background:var(--bad); color:#fff}
+.opt.reveal{background:var(--teal-soft)}
+.speakbtn{border:2px solid var(--edge); background:var(--sun); border-radius:50%; width:46px; height:46px;
+  font-size:1.2rem; box-shadow:var(--shadow)}
+.sessionbar{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+.sessionbar .meter{flex:1; height:12px}
+.sessionbar .meter i{background:linear-gradient(90deg,var(--teal),var(--lilac))}
+.examplebox{margin-top:14px; padding:12px; border-radius:12px; background:var(--lilac-soft); font-weight:600}
+
+/* ============ stories ============ */
+.storycard{display:flex; gap:14px; align-items:center}
+.storycard .semoji{font-size:2.3rem}
+.para{margin:0 0 4px; padding:12px 14px; border-radius:14px; background:var(--card);
+  border:2px solid var(--edge); box-shadow:var(--shadow); font-size:1.18rem; line-height:1.75; font-weight:600}
+.para .gw{color:var(--accent); font-weight:900; border-bottom:3px dotted var(--accent); cursor:pointer}
+.para-en{margin:0 0 12px; padding:8px 14px 8px; font-size:.9rem; color:var(--muted); font-weight:600; display:none}
+.para-wrap.showen .para-en{display:block}
+.para-tools{display:flex; gap:8px; margin:-2px 0 12px; padding:0 4px}
+.tinybtn{border:none; background:transparent; color:var(--muted); font-weight:800; font-size:.75rem; padding:4px 6px}
+.choicebox{background:var(--sun-soft); border:2px solid var(--edge); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:14px; margin:8px 0 14px}
+.glosspop{position:fixed; left:50%; transform:translateX(-50%); bottom:100px; z-index:60;
+  background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:14px; font-weight:800;
+  box-shadow:0 6px 20px rgba(0,0,0,.3); display:none; max-width:88vw; text-align:center}
+
+/* ============ speak ============ */
+.grade3{display:flex; gap:8px}
+.grade3 .btn{flex:1; padding:11px 6px; font-size:.85rem}
+#micbtn.listening{background:var(--bad); color:#fff; animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ============ misc ============ */
+.pill{display:inline-block; background:var(--teal-soft); color:var(--teal); border-radius:999px;
+  padding:3px 11px; font-weight:800; font-size:.78rem}
+.badgegrid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; text-align:center}
+.badge{opacity:.28; filter:grayscale(1)}
+.badge.won{opacity:1; filter:none}
+.badge .bico{font-size:1.8rem}
+.badge .bname{font-size:.62rem; font-weight:800; color:var(--muted)}
+#toast{position:fixed; top:14px; left:50%; transform:translateX(-50%) translateY(-80px); z-index:70;
+  background:var(--ink); color:var(--bg); padding:11px 20px; border-radius:14px; font-weight:800;
+  transition:transform .3s ease; max-width:88vw; text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:80}
+.center{text-align:center}
+.row{display:flex; gap:10px; align-items:center}
+.row .grow{flex:1}
+.backrow{margin-bottom:10px}
+.result-big{font-size:3rem}
+.hidden{display:none!important}
+</style>
+
+<div id="app">
+  <div id="topbar">
+    <div class="brand">סבבה!</div>
+    <div id="xpwrap">
+      <div id="xpbar"><div id="xpfill"></div></div>
+      <div id="lvlname"></div>
+    </div>
+    <div class="statchip" id="streakchip" title="Daily streak">🔥 <span id="streakn">0</span></div>
+  </div>
+  <main id="screen"></main>
+</div>
+
+<nav id="tabbar" aria-label="Main">
+  <div class="rail">
+    <button class="tab active" data-tab="home"><span class="ico">🏠</span>Home</button>
+    <button class="tab" data-tab="words"><span class="ico">🃏</span>Words</button>
+    <button class="tab" data-tab="stories"><span class="ico">📖</span>Stories</button>
+    <button class="tab" data-tab="speak"><span class="ico">🎤</span>Speak</button>
+  </div>
+</nav>
+
+<div id="glosspop" class="glosspop" role="status"></div>
+<div id="toast" role="status"></div>
+<canvas id="confetti"></canvas>
+
+<script id="data-vocab">
+const VOCAB_PACKS = [
+{ id:"idioms", icon:"😏", name:"ביטויים אמיתיים", nameEn:"Idioms & real talk", words:[
+ {he:"אין לי מושג", en:"I have no idea", ex:"אין לי מושג איפה שמתי את המפתחות.", exEn:"I have no idea where I put my keys."},
+ {he:"על קצה הלשון", en:"on the tip of my tongue", ex:"רגע, זה על קצה הלשון שלי!", exEn:"Wait, it's on the tip of my tongue!"},
+ {he:"לשבור את הראש", en:"to rack one's brain", ex:"שברתי את הראש שעה על החידה הזאת.", exEn:"I racked my brain over that riddle for an hour."},
+ {he:"ירד לי האסימון", en:"the penny dropped / I finally got it", ex:"רק בסוף השיעור ירד לי האסימון.", exEn:"Only at the end of the lesson did it finally click."},
+ {he:"לשים לב", en:"to notice / pay attention", ex:"שמתי לב שהיא יושבת לבד בהפסקות.", exEn:"I noticed she sits alone during breaks."},
+ {he:"לעשות רושם", en:"to make an impression", ex:"הוא ניסה לעשות רושם על המורה החדשה.", exEn:"He tried to make an impression on the new teacher."},
+ {he:"ברגע האחרון", en:"at the last minute", ex:"הגשתי את העבודה ממש ברגע האחרון.", exEn:"I handed in the assignment at the very last minute."},
+ {he:"בלית ברירה", en:"having no other choice", ex:"בלית ברירה, חזרנו הביתה ברגל בגשם.", exEn:"With no other choice, we walked home in the rain."},
+ {he:"מצא חן בעיניי", en:"I liked it (it found favor in my eyes)", ex:"הרעיון שלך ממש מצא חן בעיניי.", exEn:"I really liked your idea."},
+ {he:"לקחת ללב", en:"to take (it) to heart", ex:"אל תיקחי ללב כל הערה קטנה.", exEn:"Don't take every little comment to heart."},
+ {he:"נשבר לי", en:"I'm fed up / I've had it", ex:"נשבר לי מהשיעורים המשעממים האלה.", exEn:"I'm fed up with these boring classes."},
+ {he:"להעביר את הזמן", en:"to pass the time", ex:"שיחקנו קלפים כדי להעביר את הזמן בטיסה.", exEn:"We played cards to pass the time on the flight."},
+ {he:"בקטנה", en:"low-key / no big deal", ex:"חגגנו בקטנה, רק עם המשפחה.", exEn:"We celebrated low-key, just with family."},
+ {he:"להתחרפן", en:"to freak out / lose it", ex:"התחרפנתי כשראיתי כמה שאלות יש במבחן.", exEn:"I freaked out when I saw how many questions were on the test."},
+ {he:"לפספס", en:"to miss (a chance, a bus)", ex:"פספסתי את האוטובוס בדקה אחת.", exEn:"I missed the bus by one minute."},
+ {he:"להתבאס", en:"to get bummed out", ex:"התבאסתי כשהטיול השנתי נדחה.", exEn:"I was bummed when the class trip was postponed."},
+ {he:"חסר טעם", en:"pointless", ex:"חסר טעם להתווכח איתו, הוא לא מקשיב.", exEn:"It's pointless to argue with him, he doesn't listen."},
+ {he:"במקומך", en:"if I were you", ex:"במקומך הייתי מתנצלת לפני שזה מסתבך.", exEn:"If I were you, I'd apologize before it gets complicated."},
+ {he:"חבל על הזמן", en:"amazing (lit. 'waste of time')", ex:"ההצגה הייתה חבל על הזמן.", exEn:"The show was incredible."},
+ {he:"עדיף", en:"preferable / better to", ex:"עדיף לצאת מוקדם מאשר להגיע לחוצים.", exEn:"Better to leave early than arrive stressed."}
+]},
+{ id:"feelings", icon:"💜", name:"רגשות ואופי", nameEn:"Emotions & character", words:[
+ {he:"אכזבה", en:"disappointment", ex:"איזו אכזבה — ההופעה בוטלה ברגע האחרון.", exEn:"What a disappointment — the show was canceled at the last minute."},
+ {he:"תסכול", en:"frustration", ex:"הרגשתי תסכול כשהתרגיל לא הסתדר לי.", exEn:"I felt frustration when I couldn't work out the exercise."},
+ {he:"הקלה", en:"relief", ex:"איזו הקלה, המבחן נדחה בשבוע!", exEn:"What a relief, the test was pushed off a week!"},
+ {he:"חרטה", en:"regret", ex:"הרגשתי חרטה על המילים שאמרתי לה.", exEn:"I felt regret over the words I said to her."},
+ {he:"מבוכה", en:"embarrassment", ex:"הפנים שלי האדימו ממבוכה מול כל הכיתה.", exEn:"My face turned red with embarrassment in front of the whole class."},
+ {he:"געגועים", en:"longing / missing someone", ex:"יש לי געגועים לחברות שלי מהקיץ.", exEn:"I miss my friends from the summer."},
+ {he:"ביטחון עצמי", en:"self-confidence", ex:"ההופעה על הבמה נתנה לה המון ביטחון עצמי.", exEn:"Performing on stage gave her a lot of self-confidence."},
+ {he:"סקרנות", en:"curiosity", ex:"הסקרנות ניצחה, ופתחתי את המכתב.", exEn:"Curiosity won, and I opened the letter."},
+ {he:"התלהבות", en:"enthusiasm", ex:"היא סיפרה על התוכנית בהתלהבות עצומה.", exEn:"She described the plan with huge enthusiasm."},
+ {he:"נאמנות", en:"loyalty", ex:"נאמנות היא הדבר החשוב ביותר בחברות.", exEn:"Loyalty is the most important thing in a friendship."},
+ {he:"כנות", en:"honesty / sincerity", ex:"אני מעריכה את הכנות שלך, גם כשזה קשה.", exEn:"I appreciate your honesty, even when it's hard."},
+ {he:"אומץ", en:"courage", ex:"צריך אומץ אמיתי כדי להודות בטעות.", exEn:"It takes real courage to admit a mistake."},
+ {he:"עקשנית", en:"stubborn (f.)", ex:"היא עקשנית — כשהיא מחליטה, אין מה לעשות.", exEn:"She's stubborn — once she decides, there's nothing to be done."},
+ {he:"רגישה", en:"sensitive (f.)", ex:"היא רגישה, אז כדאי לבחור מילים בזהירות.", exEn:"She's sensitive, so it's worth choosing words carefully."},
+ {he:"אדישה", en:"indifferent / doesn't care (f.)", ex:"היא נראתה אדישה לגמרי לתוצאות.", exEn:"She seemed completely indifferent to the results."},
+ {he:"אכפתית", en:"caring (f.)", ex:"היא הכי אכפתית בשכבה, תמיד עוזרת לכולם.", exEn:"She's the most caring one in the grade, always helping everyone."},
+ {he:"קנאה", en:"jealousy / envy", ex:"קצת קנאה בין אחיות זה טבעי לגמרי.", exEn:"A little jealousy between sisters is completely natural."},
+ {he:"שאפתנית", en:"ambitious (f.)", ex:"היא שאפתנית ומתכננת להיות רופאה.", exEn:"She's ambitious and plans to be a doctor."},
+ {he:"צנועה", en:"modest / humble (f.)", ex:"למרות כל ההישגים שלה, היא נשארה צנועה.", exEn:"Despite all her achievements, she stayed modest."},
+ {he:"סבלנות", en:"patience", ex:"צריך המון סבלנות כדי ללמד אח קטן שחמט.", exEn:"You need a lot of patience to teach a little brother chess."}
+]},
+{ id:"school", icon:"📚", name:"עברית של מבחנים", nameEn:"Academic Hebrew", words:[
+ {he:"רעיון מרכזי", en:"main idea", ex:"מהו הרעיון המרכזי של הפסקה הראשונה?", exEn:"What is the main idea of the first paragraph?"},
+ {he:"פסקה", en:"paragraph", ex:"קראי את הפסקה השנייה וענה על השאלות.", exEn:"Read the second paragraph and answer the questions."},
+ {he:"להסיק", en:"to conclude / infer", ex:"מה אפשר להסיק מהתנהגות הדמות?", exEn:"What can be inferred from the character's behavior?"},
+ {he:"מסקנה", en:"conclusion", ex:"המסקנה שלי: שווה להתאמן לפני, לא בלילה שלפני.", exEn:"My conclusion: it's worth practicing ahead, not the night before."},
+ {he:"לנמק", en:"to justify / give reasons", ex:"כתבי את דעתך ונמקי אותה בשני נימוקים.", exEn:"Write your opinion and support it with two reasons."},
+ {he:"טיעון", en:"argument / claim", ex:"הטיעון שלה שכנע את כל הכיתה.", exEn:"Her argument convinced the whole class."},
+ {he:"עובדה", en:"fact", ex:"זו עובדה, לא דעה — אפשר לבדוק את זה.", exEn:"That's a fact, not an opinion — you can check it."},
+ {he:"דעה", en:"opinion", ex:"חשוב להבדיל בין עובדה לבין דעה.", exEn:"It's important to distinguish between fact and opinion."},
+ {he:"סיבה ותוצאה", en:"cause and effect", ex:"מצאי בקטע קשר של סיבה ותוצאה.", exEn:"Find a cause-and-effect relationship in the passage."},
+ {he:"מטרה", en:"goal / purpose", ex:"מה מטרת הכותב בקטע הזה?", exEn:"What is the writer's purpose in this passage?"},
+ {he:"להשוות", en:"to compare", ex:"השוו בין שתי הדמויות בסיפור.", exEn:"Compare the two characters in the story."},
+ {he:"לסכם", en:"to summarize", ex:"סכמי את הפרק בשלושה משפטים.", exEn:"Summarize the chapter in three sentences."},
+ {he:"להדגיש", en:"to emphasize", ex:"המורה הדגישה שהמבחן כולל גם את פרק ג'.", exEn:"The teacher emphasized that the test also covers chapter 3."},
+ {he:"לפרש", en:"to interpret", ex:"איך אפשר לפרש את המשפט האחרון?", exEn:"How can the last sentence be interpreted?"},
+ {he:"לצטט", en:"to quote", ex:"צטטי משפט מהטקסט שתומך בתשובה שלך.", exEn:"Quote a sentence from the text that supports your answer."},
+ {he:"מקור", en:"source", ex:"מאיזה מקור לקחת את המידע הזה?", exEn:"What source did you take this information from?"},
+ {he:"תהליך", en:"process", ex:"תארי את התהליך שלב אחרי שלב.", exEn:"Describe the process step by step."},
+ {he:"תופעה", en:"phenomenon", ex:"החרם בכיתה הוא תופעה שחייבים לעצור.", exEn:"The class boycott is a phenomenon that must be stopped."},
+ {he:"השערה", en:"hypothesis / educated guess", ex:"ההשערה שלי התבררה כנכונה.", exEn:"My hypothesis turned out to be correct."},
+ {he:"משמעות", en:"meaning / significance", ex:"מה המשמעות של הביטוי הזה בהקשר?", exEn:"What is the meaning of this expression in context?"}
+]},
+{ id:"connect", icon:"⚡", name:"מילות קישור", nameEn:"High-level connectors", words:[
+ {he:"אולם", en:"however (formal)", ex:"רציתי לבוא, אולם הייתי חייבת להישאר לעזור.", exEn:"I wanted to come; however, I had to stay and help."},
+ {he:"אמנם... אבל", en:"admittedly... but", ex:"אמנם המשימה קשה, אבל היא שווה את המאמץ.", exEn:"Admittedly the task is hard, but it's worth the effort."},
+ {he:"לעומת זאת", en:"on the other hand / in contrast", ex:"אחותי אוהבת חורף; אני, לעומת זאת, חיה על הקיץ.", exEn:"My sister loves winter; I, on the other hand, live for summer."},
+ {he:"מצד אחד... מצד שני", en:"on one hand... on the other", ex:"מצד אחד בא לי לישון, מצד שני חבל לפספס.", exEn:"On one hand I want to sleep, on the other it's a shame to miss out."},
+ {he:"כלומר", en:"that is / meaning", ex:"הוא 'עסוק', כלומר — לא בא לו.", exEn:"He's 'busy,' meaning — he doesn't feel like it."},
+ {he:"לפיכך", en:"therefore (formal)", ex:"ירד גשם חזק, לפיכך הטיול בוטל.", exEn:"It rained hard; therefore, the trip was canceled."},
+ {he:"כתוצאה מכך", en:"as a result", ex:"התאמנה כל השנה, וכתוצאה מכך זכתה במקום הראשון.", exEn:"She trained all year, and as a result won first place."},
+ {he:"עקב", en:"due to (formal)", ex:"השיעור בוטל עקב מחלת המורה.", exEn:"The lesson was canceled due to the teacher's illness."},
+ {he:"בזכות", en:"thanks to", ex:"עברתי את המבחן בזכות העזרה שלך.", exEn:"I passed the test thanks to your help."},
+ {he:"בניגוד ל...", en:"unlike / in contrast to", ex:"בניגוד לתחזית, היה יום שמש מושלם.", exEn:"Contrary to the forecast, it was a perfect sunny day."},
+ {he:"בהשוואה ל...", en:"compared to", ex:"בהשוואה לשנה שעברה, השתפרתי מאוד.", exEn:"Compared to last year, I've improved a lot."},
+ {he:"על מנת", en:"in order to (formal)", ex:"יצאנו מוקדם על מנת לתפוס מקומות טובים.", exEn:"We left early in order to grab good seats."},
+ {he:"בנוסף", en:"in addition", ex:"בנוסף לחוג ריקוד, היא גם מנגנת בפסנתר.", exEn:"In addition to dance class, she also plays piano."},
+ {he:"למעשה", en:"in fact / actually", ex:"למעשה, זאת הייתה בכלל טעות שלי.", exEn:"In fact, it was actually my mistake."},
+ {he:"בעיקר", en:"mainly / especially", ex:"אני אוהבת לקרוא, בעיקר סיפורי מתח.", exEn:"I love reading, especially thrillers."},
+ {he:"לחלוטין", en:"completely / absolutely", ex:"את צודקת לחלוטין, טעיתי.", exEn:"You're absolutely right, I was wrong."},
+ {he:"בהדרגה", en:"gradually", ex:"בהדרגה התרגלתי לקום מוקדם.", exEn:"Gradually I got used to waking up early."},
+ {he:"לעיתים קרובות", en:"often / frequently", ex:"אנחנו רבות לעיתים קרובות, אבל תמיד משלימות.", exEn:"We argue often, but we always make up."},
+ {he:"לעיתים רחוקות", en:"rarely / seldom", ex:"לעיתים רחוקות יורד כאן שלג.", exEn:"It rarely snows here."},
+ {he:"ככל הנראה", en:"most likely / apparently", ex:"ככל הנראה המסיבה תידחה לשבוע הבא.", exEn:"Most likely the party will be postponed to next week."}
+]},
+{ id:"verbs", icon:"🚀", name:"פעלים ברמה", nameEn:"Advanced verbs", words:[
+ {he:"להתמודד עם", en:"to cope / deal with", ex:"למדתי להתמודד עם לחץ לפני מבחנים.", exEn:"I learned to deal with pressure before tests."},
+ {he:"לשקול", en:"to consider / weigh", ex:"אני שוקלת לעבור לחוג תיאטרון.", exEn:"I'm considering switching to the theater club."},
+ {he:"להעריך", en:"to appreciate / estimate", ex:"אני מעריכה את זה שבאת לתמוך בי.", exEn:"I appreciate that you came to support me."},
+ {he:"להשקיע", en:"to invest / put in effort", ex:"השקעתי שעות בפרויקט הזה.", exEn:"I put hours of work into this project."},
+ {he:"לתרום", en:"to contribute / donate", ex:"כל אחד תרם משהו למסיבת הכיתה.", exEn:"Everyone contributed something to the class party."},
+ {he:"להשפיע על", en:"to influence / affect", ex:"החברים שלנו משפיעים עלינו יותר משנדמה לנו.", exEn:"Our friends influence us more than we realize."},
+ {he:"ליזום", en:"to initiate / take the lead", ex:"היא יזמה מגבית לילדים חולים.", exEn:"She initiated a fundraiser for sick children."},
+ {he:"לשתף פעולה", en:"to cooperate", ex:"הקבוצה ניצחה כי כולם שיתפו פעולה.", exEn:"The team won because everyone cooperated."},
+ {he:"להתמיד", en:"to persevere / stick with it", ex:"מי שמתמיד באימונים — משתפר.", exEn:"Those who persevere in training improve."},
+ {he:"להתגבר על", en:"to overcome", ex:"התגברתי על הפחד שלי מגבהים.", exEn:"I overcame my fear of heights."},
+ {he:"להביע", en:"to express", ex:"קשה לי להביע רגשות מול אנשים.", exEn:"It's hard for me to express feelings in front of people."},
+ {he:"להצדיק", en:"to justify", ex:"אין שום דבר שמצדיק התנהגות כזאת.", exEn:"Nothing justifies behavior like that."},
+ {he:"להתנגד", en:"to object / oppose", ex:"רוב הכיתה התנגדה לרעיון של המורה.", exEn:"Most of the class opposed the teacher's idea."},
+ {he:"להימנע מ...", en:"to avoid", ex:"אני מנסה להימנע מריבים מיותרים.", exEn:"I try to avoid unnecessary fights."},
+ {he:"לצפות", en:"to expect / anticipate", ex:"לא ציפיתי שהיא תגיע להפתיע אותי.", exEn:"I didn't expect her to come surprise me."},
+ {he:"להגשים", en:"to fulfill (a dream)", ex:"היא הגשימה חלום כשעלתה על הבמה.", exEn:"She fulfilled a dream when she got on stage."},
+ {he:"להתאכזב", en:"to be disappointed", ex:"התאכזבתי מהסוף של הסדרה.", exEn:"I was disappointed by the series finale."},
+ {he:"להתרשם", en:"to be impressed", ex:"השופטים התרשמו מהריקוד שלה.", exEn:"The judges were impressed by her dance."},
+ {he:"להתעלם מ...", en:"to ignore", ex:"החלטתי להתעלם מההערות המעצבנות שלו.", exEn:"I decided to ignore his annoying comments."},
+ {he:"להתאפק", en:"to hold back / restrain oneself", ex:"בקושי התאפקתי לא לצחוק באמצע השיעור.", exEn:"I could barely hold back from laughing in the middle of class."}
+]},
+{ id:"nouns", icon:"🌟", name:"שמות עצם חזקים", nameEn:"Power nouns", words:[
+ {he:"הזדמנות", en:"opportunity", ex:"זאת הזדמנות שאסור לפספס.", exEn:"This is an opportunity you can't miss."},
+ {he:"אתגר", en:"challenge", ex:"המסלול הקשה היה אתגר אמיתי.", exEn:"The hard trail was a real challenge."},
+ {he:"הישג", en:"achievement", ex:"מקום שני בתחרות ארצית — איזה הישג!", exEn:"Second place in a national competition — what an achievement!"},
+ {he:"כישרון", en:"talent", ex:"יש לה כישרון מטורף לציור.", exEn:"She has a crazy talent for drawing."},
+ {he:"חוויה", en:"experience (event)", ex:"הקעמפ היה חוויה שלא אשכח.", exEn:"Camp was an experience I'll never forget."},
+ {he:"זיכרון", en:"memory", ex:"יש לי זיכרון מעולה לפרצופים ואפס לשמות.", exEn:"I have a great memory for faces and zero for names."},
+ {he:"דמיון", en:"imagination", ex:"לסופרת הזאת יש דמיון פרוע.", exEn:"That author has a wild imagination."},
+ {he:"השראה", en:"inspiration", ex:"היא מקור השראה לכל הבנות בשכבה.", exEn:"She's an inspiration to all the girls in the grade."},
+ {he:"מחויבות", en:"commitment", ex:"להיות בנבחרת דורש מחויבות רצינית.", exEn:"Being on the team requires serious commitment."},
+ {he:"עצמאות", en:"independence", ex:"המעבר לחטיבה נתן לי יותר עצמאות.", exEn:"Moving to middle school gave me more independence."},
+ {he:"אחריות", en:"responsibility", ex:"לקחתי אחריות על הטעות והתנצלתי.", exEn:"I took responsibility for the mistake and apologized."},
+ {he:"ביקורת", en:"criticism", ex:"קשה לי לקבל ביקורת, אבל אני לומדת.", exEn:"It's hard for me to take criticism, but I'm learning."},
+ {he:"פתרון", en:"solution", ex:"חייבים למצוא פתרון שיתאים לכולן.", exEn:"We have to find a solution that works for everyone."},
+ {he:"פשרה", en:"compromise", ex:"בסוף הגענו לפשרה: חצי־חצי.", exEn:"In the end we reached a compromise: half and half."},
+ {he:"ויכוח", en:"argument / debate", ex:"היה ויכוח סוער על המקום של הטיול.", exEn:"There was a heated debate about the trip destination."},
+ {he:"יתרון", en:"advantage", ex:"לקום מוקדם זה יתרון ענק בבקרים.", exEn:"Waking up early is a huge advantage in the mornings."},
+ {he:"חיסרון", en:"disadvantage", ex:"החיסרון היחיד של הבית החדש — רחוק מהחברות.", exEn:"The only disadvantage of the new house — far from my friends."},
+ {he:"הרגל", en:"habit", ex:"סידרתי לעצמי הרגל חדש: קריאה לפני השינה.", exEn:"I built myself a new habit: reading before bed."},
+ {he:"שגרה", en:"routine", ex:"אחרי החופש קשה לחזור לשגרה.", exEn:"After vacation it's hard to get back to routine."},
+ {he:"סיכוי", en:"chance / odds", ex:"יש לנו סיכוי אמיתי לזכות בגביע.", exEn:"We have a real chance of winning the cup."}
+]}
+];
+</script>
+
+<script id="data-stories">
+/* In story text, words wrapped in *asterisks* are tappable glossed words. */
+const STORIES = [
+{ id:"shadow", emoji:"🕵️‍♀️", title:"מי זה @צל?", titleEn:"Who is @Shadow?", blurb:"מישהו אנונימי בקבוצת הכיתה יודע דברים שאף אחד לא אמור לדעת...",
+ gloss:{"רטט":"vibrated","נשבעה":"swore","טען":"claimed","השתתקתי":"I went silent","שילוב":"a combination","חשודים":"suspects","מסוגלת":"capable (f.)","הצטרפה":"joined (f.)","ויתרה":"gave up (f.)","בקצה":"at the edge / far end","להאשים":"to accuse","מלכודת":"a trap","בהיתי":"I stared","הוכחה":"proof","בושה":"shame","להפך":"on the contrary","קפאה":"froze (f.)","לבסוף":"finally / at last","מפרגן":"gives credit / cheers on","בתנאי":"on condition","שותפה":"a partner (f.)"},
+ chapters:[
+ { title:"הודעה מוזרה", paras:[
+   {he:"הכול התחיל ביום שלישי רגיל לגמרי, באמצע שיעור מתמטיקה משעמם.", en:"It all started on a completely ordinary Tuesday, in the middle of a boring math class."},
+   {he:"הטלפון של חצי כיתה *רטט* בבת אחת. מישהו חדש נכנס לקבוצה של הכיתה — משתמש בלי תמונה, בשם \"צל\".", en:"Half the class's phones vibrated at once. Someone new had joined the class group — a user with no picture, named \"Shadow.\""},
+   {he:"ההודעה הראשונה שלו הייתה קצרה: \"אני יודע דברים שאתם לא שמים לב אליהם.\"", en:"His first message was short: \"I know things you don't notice.\""},
+   {he:"בהפסקה כולם דיברו רק על זה. רוני *נשבעה* שזה מישהו מהכיתה המקבילה. עומר *טען* שזאת בכלל בדיחה של המחנכת.", en:"At recess everyone talked only about that. Roni swore it was someone from the parallel class. Omer claimed it was actually a prank by the homeroom teacher."},
+   {he:"ואז הגיעה ההודעה השנייה: \"מי שהחזירה אתמול את הארנק שנפל ליד השער — את אלופה. ראיתי הכול.\"", en:"Then came the second message: \"Whoever returned the wallet that fell by the gate yesterday — you're a champion. I saw everything.\""},
+   {he:"*השתתקתי*. הארנק. אני החזרתי אותו, ואף אחד לא ראה. ככה חשבתי, לפחות.", en:"I went silent. The wallet. I returned it, and nobody saw. Or so I thought."},
+   {he:"הרגשתי *שילוב* מוזר של מבוכה וסקרנות. מי זה צל? ואיך הוא יודע?", en:"I felt a strange combination of embarrassment and curiosity. Who is Shadow? And how does he know?"}],
+  choice:{he:"מה דנה צריכה לעשות?", en:"What should Dana do?", options:[
+   {he:"לשלוח לצל הודעה פרטית: \"מי אתה?\"", en:"Send Shadow a private message: \"Who are you?\"", replyHe:"שלחתי. צל ראה את ההודעה... ולא ענה. שלוש נקודות הופיעו, נעלמו, והופיעו שוב. מסתורי.", replyEn:"I sent it. Shadow saw the message... and didn't answer. Three dots appeared, vanished, and appeared again. Mysterious."},
+   {he:"לשתוק, לעקוב, ולא לגלות לאף אחד", en:"Stay quiet, watch, and tell no one", replyHe:"החלטתי לשתוק ולעקוב. אם צל רואה הכול — גם אני יכולה ללמוד לראות.", replyEn:"I decided to stay quiet and watch. If Shadow sees everything — I can learn to see too."}]},
+  quiz:[
+   {q:"מה היה מיוחד במשתמש \"צל\"?", opts:["אין לו תמונה ואף אחד לא יודע מי הוא","הוא המורה למתמטיקה","הוא כותב רק באנגלית"], a:0},
+   {q:"מה דנה הבינה מההודעה השנייה?", opts:["שצל ראה אותה מחזירה את הארנק","שצל גנב את הארנק","שרוני כתבה את ההודעה"], a:0},
+   {q:"מה הרגישה דנה בסוף הפרק?", opts:["שילוב של מבוכה וסקרנות","שמחה גדולה","כעס על עומר"], a:0}]},
+ { title:"רשימת החשודים", paras:[
+   {he:"בערב הכנתי במחברת רשימת *חשודים*: כל מי שהיה יכול לדעת על הארנק.", en:"That evening I made a list of suspects in my notebook: everyone who could have known about the wallet."},
+   {he:"החשודה הראשונה: תמר, החברה הכי טובה שלי. היא תמיד יודעת הכול על כולם. אבל תמר לא *מסוגלת* לשמור סוד יותר מדקה וחצי.", en:"First suspect: Tamar, my best friend. She always knows everything about everyone. But Tamar is incapable of keeping a secret for more than a minute and a half."},
+   {he:"החשוד השני: איתי, שיושב ליד החלון ורואה כל מה שקורה בחצר. אבל איתי בקושי מרים את הראש מהטלפון.", en:"Second suspect: Itai, who sits by the window and sees everything that happens in the yard. But Itai barely lifts his head from his phone."},
+   {he:"ואז נזכרתי במישהי שלישית. אֵלָה. הילדה החדשה ש*הצטרפה* אלינו לפני חודשיים ובקושי מדברת.", en:"Then I remembered a third person. Ella. The new girl who joined us two months ago and barely speaks."},
+   {he:"אלה תמיד יושבת *בקצה*, מציירת במחברת, ומסתכלת. פשוט מסתכלת.", en:"Ella always sits at the far end, drawing in her notebook, and watching. Just watching."},
+   {he:"למחרת צל כתב שוב: \"למי ש*ויתרה* על התור שלה בקפיטריה בשביל ילד מכיתה א' — יש לך לב ענק.\"", en:"The next day Shadow wrote again: \"To the girl who gave up her place in the cafeteria line for a first-grader — you have a huge heart.\""},
+   {he:"הסתובבתי בשקט. מהמקום של אלה רואים בדיוק את הקפיטריה. הלב שלי התחיל לדפוק חזק.", en:"I turned around quietly. From Ella's seat you can see the cafeteria exactly. My heart started pounding."}],
+  choice:{he:"מה עכשיו?", en:"What now?", options:[
+   {he:"לגשת לאלה ולשאול אותה ישר", en:"Go up to Ella and ask her directly", replyHe:"כמעט ניגשתי. אבל מה אם אני טועה? להאשים מישהי בלי הוכחה — זה בדיוק הדבר שצל לא היה עושה.", replyEn:"I almost did. But what if I'm wrong? Accusing someone without proof — that's exactly what Shadow would never do."},
+   {he:"לאסוף עוד ראיה אחת לפני שמאשימים", en:"Gather one more piece of evidence before accusing", replyHe:"החלטתי לחכות. בלשית טובה לא ממהרת — היא בודקת.", replyEn:"I decided to wait. A good detective doesn't rush — she checks."}]},
+  quiz:[
+   {q:"למה דנה מחקה את תמר מרשימת החשודים?", opts:["כי תמר לא מסוגלת לשמור סוד","כי תמר הייתה חולה באותו יום","כי לתמר אין טלפון"], a:0},
+   {q:"מה מיוחד באלה?", opts:["היא חדשה, שקטה, וכל הזמן מתבוננת","היא הכי מצחיקה בכיתה","היא אחותו של איתי"], a:0},
+   {q:"איזו ראיה חיברה בין אלה לבין צל?", opts:["מהמקום שלה רואים את הקפיטריה","היא חתמה בטעות בשמה האמיתי","המחנכת סיפרה לדנה"], a:0}]},
+ { title:"המלכודת", paras:[
+   {he:"החלטתי לא *להאשים* בלי הוכחה. במקום זה, טמנתי *מלכודת* קטנה.", en:"I decided not to accuse without proof. Instead, I set a little trap."},
+   {he:"בהפסקה, כשאף אחד לא הסתכל, עזרתי לשרת לאסוף כיסאות שנפלו במסדרון. עשיתי את זה בשקט, בכוונה, רק כשאלה הייתה בסביבה.", en:"At recess, when no one was looking, I helped the janitor pick up chairs that had fallen in the hallway. I did it quietly, on purpose, only when Ella was around."},
+   {he:"כל אחר הצהריים *בהיתי* בטלפון וחיכיתי.", en:"All afternoon I stared at my phone and waited."},
+   {he:"בשמונה בערב זה הגיע: \"יש בכיתה שלנו מישהי שעוזרת גם כשאף אחד לא רואה. היום, במסדרון. כבוד.\"", en:"At eight in the evening it arrived: \"There's a girl in our class who helps even when no one is watching. Today, in the hallway. Respect.\""},
+   {he:"זהו. זאת הייתה ה*הוכחה*. רק אלה עברה שם באותו רגע.", en:"That was it. That was the proof. Only Ella had passed by at that moment."},
+   {he:"אבל פתאום הרגשתי משהו מוזר. לא ניצחון — אלא *בושה* קטנה. צל לא פגע באף אחד. *להפך*: הוא גרם לכולם להתנהג יפה יותר, בתקווה שמישהו ישים לב.", en:"But suddenly I felt something strange. Not victory — a small shame. Shadow hadn't hurt anyone. On the contrary: he made everyone behave better, hoping someone would notice."},
+   {he:"בשבוע האחרון, הכיתה שלנו נהייתה... נחמדה יותר. עובדה.", en:"This past week, our class had become... nicer. That's a fact."}],
+  choice:{he:"איך לסיים את התעלומה?", en:"How should the mystery end?", options:[
+   {he:"לחשוף את צל מול כל הכיתה", en:"Expose Shadow in front of the whole class", replyHe:"דמיינתי את זה רגע — ומיד ירד לי האסימון: לחשוף אותה זה להרוס את הדבר היפה שהיא בנתה. לא. זה יהיה בינינו.", replyEn:"I imagined it for a second — and then it hit me: exposing her would destroy the beautiful thing she built. No. This stays between us."},
+   {he:"לדבר איתה בארבע עיניים", en:"Talk to her one-on-one", replyHe:"בדיוק. דברים חשובים אומרים פנים אל פנים, בלי קהל.", replyEn:"Exactly. Important things are said face to face, without an audience."}]},
+  quiz:[
+   {q:"מה הייתה המלכודת של דנה?", opts:["לעשות מעשה טוב בשקט, רק כשאלה בסביבה","לשלוח לצל קישור מזויף","לשאול כל אחד בכיתה איפה היה"], a:0},
+   {q:"מה הרגישה דנה כשהמלכודת הצליחה?", opts:["בושה קטנה במקום ניצחון","גאווה עצומה","פחד מאלה"], a:0},
+   {q:"איך השפיע צל על הכיתה, לפי דנה?", opts:["כולם התחילו להתנהג יפה יותר","כולם רבו יותר","שום דבר לא השתנה"], a:0}]},
+ { title:"בארבע עיניים", paras:[
+   {he:"למחרת חיכיתי לאלה ליד השער, אחרי הצלצול האחרון.", en:"The next day I waited for Ella by the gate, after the last bell."},
+   {he:"\"אני יודעת שזאת את,\" אמרתי בשקט. \"צל.\"", en:"\"I know it's you,\" I said quietly. \"Shadow.\""},
+   {he:"היא *קפאה*. ראיתי את הפנים שלה מחליפות צבע — קודם לבן, אחר כך אדום.", en:"She froze. I watched her face change color — first white, then red."},
+   {he:"\"כשהגעתי לבית הספר הזה,\" היא אמרה *לבסוף*, \"אף אחד לא דיבר איתי. אז התחלתי להסתכל. וראיתי כמה דברים טובים אנשים עושים בלי שאף אחד *מפרגן* להם.\"", en:"\"When I came to this school,\" she said at last, \"no one talked to me. So I started watching. And I saw how many good things people do without anyone giving them credit.\""},
+   {he:"\"אז החלטת להיות הצל שלהם,\" אמרתי, והיא חייכה חיוך קטן, ראשון.", en:"\"So you decided to be their shadow,\" I said, and she smiled a small, first smile."},
+   {he:"\"הסוד שלך שמור אצלי,\" הבטחתי. \"*בתנאי* אחד: שמחר את יושבת לידי בהפסקה. לא בקצה.\"", en:"\"Your secret is safe with me,\" I promised. \"On one condition: tomorrow you sit next to me at recess. Not at the far end.\""},
+   {he:"מאז יש לצל *שותפה*. ואם עשיתם השבוע משהו טוב בשקט — דעו לכם: שתינו ראינו.", en:"Since then, Shadow has a partner. And if you did something good quietly this week — know this: we both saw."}],
+  quiz:[
+   {q:"למה אלה התחילה לכתוב בתור צל?", opts:["היא הרגישה לבד, התבוננה, וראתה מעשים טובים שאף אחד לא מפרגן עליהם","היא רצתה להפחיד את הכיתה","המחנכת ביקשה ממנה"], a:0},
+   {q:"מה התנאי של דנה לשמירת הסוד?", opts:["שאלה תשב לידה בהפסקה","שאלה תמחק את הקבוצה","שאלה תכין לה שיעורים"], a:0},
+   {q:"מה אפשר להסיק מהמשפט האחרון של הסיפור?", opts:["דנה הצטרפה לאלה והן ממשיכות לפרגן ביחד","דנה סיפרה לכולם את הסוד","אלה עזבה את בית הספר"], a:0}]}
+]},
+{ id:"audition", emoji:"🎤", title:"סולו אחד, שתי חברות", titleEn:"One solo, two best friends", blurb:"מאיה וליבי חולמות על אותו סולו במופע סוף השנה. חברות אמיתית עומדת במבחן...",
+ gloss:{"הודיעה":"announced (f.)","התפוצצה":"exploded","קרב":"a battle","מראה":"a mirror","רעדו":"trembled","סנוור":"blinded / dazzled","נוראי":"awful","מנחמת":"comforting (f.)","לוח המודעות":"the bulletin board","הצטופפה":"crowded together","נדחפתי":"I pushed my way in","שורפת":"burning (f.)","נתקעת":"you get stuck (f.)","נדיר":"rare","חזרות":"rehearsals","מאחורי הקלעים":"backstage","וידוי":"a confession","סלע":"a rock","לחשה":"whispered (f.)","פזמון":"chorus / refrain"},
+ chapters:[
+ { title:"ההבטחה", paras:[
+   {he:"כשהמחנכת *הודיעה* על מופע סוף השנה, כל הכיתה *התפוצצה* מהתלהבות.", en:"When our homeroom teacher announced the end-of-year show, the whole class exploded with excitement."},
+   {he:"ואז היא אמרה את המשפט ששינה הכול: \"יש רק סולו אחד.\"", en:"Then she said the sentence that changed everything: \"There is only one solo.\""},
+   {he:"הסתכלתי על ליבי. ליבי הסתכלה עליי. שתינו שרות מגיל חמש. שתינו חולמות על הבמה. ושתינו ידענו בדיוק מה השנייה חושבת.", en:"I looked at Libi. Libi looked at me. We've both been singing since age five. We both dream of the stage. And we both knew exactly what the other was thinking."},
+   {he:"\"שתינו ניגש לאודישן,\" היא אמרה בסוף, \"והטובה יותר תזכה. בלי ריבים. מבטיחות?\"", en:"\"We'll both audition,\" she finally said, \"and the better one wins. No fighting. Promise?\""},
+   {he:"\"מבטיחות,\" עניתי. אבל בבטן הרגשתי משהו כבד, כמו אבן קטנה.", en:"\"Promise,\" I answered. But in my stomach I felt something heavy, like a small stone."},
+   {he:"באותו ערב התאמנתי מול ה*מראה* שעתיים. מהחלון שמעתי שגם מהבית של ליבי, שגרה ממול, מגיעה מוזיקה.", en:"That evening I practiced in front of the mirror for two hours. Through the window I heard music coming from Libi's house across the street too."},
+   {he:"שתינו התכוננו ל*קרב* — בחיוך.", en:"We were both preparing for battle — with a smile."}],
+  choice:{he:"איך כדאי למאיה להתכונן?", en:"How should Maya prepare?", options:[
+   {he:"להתאמן לבד, בסתר, כדי להפתיע", en:"Practice alone, in secret, to surprise everyone", replyHe:"התאמנתי לבד. זה הרגיש קצת בודד — אבל גם נתן לי שקט לבחור שיר שהוא לגמרי אני.", replyEn:"I practiced alone. It felt a bit lonely — but it also gave me the quiet to pick a song that was completely me."},
+   {he:"להציע לליבי להתאמן ביחד", en:"Suggest to Libi that they practice together", replyHe:"התאמנו ביחד בסלון שלה. זה היה מוזר ונהדר בו־זמנית: יריבות שמחזיקות אחת לשנייה את המיקרופון.", replyEn:"We practiced together in her living room. It was weird and wonderful at once: rivals holding the microphone for each other."}]},
+  quiz:[
+   {q:"מהו המשפט ששינה הכול?", opts:["\"יש רק סולו אחד\"","\"המופע בוטל\"","\"אין השנה מופע\""], a:0},
+   {q:"מה מסמלת \"האבן הקטנה\" בבטן של מאיה?", opts:["דאגה שההבטחה תעמוד במבחן","כאב בטן מהאוכל בקפיטריה","התרגשות מהחופש הגדול"], a:0},
+   {q:"מה אפשר להסיק מהמוזיקה שנשמעה מהבית של ליבי?", opts:["שגם ליבי התאמנה באותו ערב","שלליבי הייתה מסיבה","שליבי ויתרה על האודישן"], a:0}]},
+ { title:"האודישן", paras:[
+   {he:"ביום האודישן הידיים שלי *רעדו* כל כך, שבקושי החזקתי את דף המילים.", en:"On audition day my hands trembled so much I could barely hold the lyrics sheet."},
+   {he:"ליבי עלתה ראשונה. היא הייתה... מושלמת. הקול שלה מילא את האולם, ואפילו המורה למוזיקה הפסיקה לרשום והקשיבה.", en:"Libi went first. She was... perfect. Her voice filled the hall, and even the music teacher stopped taking notes and just listened."},
+   {he:"ואז הגיע התור שלי. עליתי לבמה, והאור *סנוור* אותי.", en:"Then it was my turn. I stepped onto the stage, and the light blinded me."},
+   {he:"התחלתי לשיר — ובאמצע הבית השני, המילים נעלמו לי. פשוט נעלמו. שנייה אחת של שקט *נוראי*.", en:"I started to sing — and in the middle of the second verse, the words vanished. Just vanished. One second of awful silence."},
+   {he:"עצמתי עיניים, נשמתי עמוק, והמשכתי מהמקום שזכרתי. סיימתי את השיר עם הלב בגרון.", en:"I closed my eyes, took a deep breath, and continued from the spot I remembered. I finished the song with my heart in my throat."},
+   {he:"בדרך החוצה ליבי חיכתה לי. \"היית מדהימה,\" היא אמרה. לא ידעתי אם היא מתכוונת לזה או סתם *מנחמת* אותי.", en:"On the way out Libi was waiting for me. \"You were amazing,\" she said. I didn't know if she meant it or was just comforting me."},
+   {he:"התוצאות — מחר על *לוח המודעות*. הלילה הזה הולך להיות ארוך.", en:"The results — tomorrow on the bulletin board. This night was going to be long."}],
+  choice:{he:"מה מאיה עושה בלילה הארוך?", en:"What does Maya do on the long night?", options:[
+   {he:"מתקשרת לליבי לדבר על הכול", en:"Call Libi and talk it all out", replyHe:"דיברנו עד אחת־עשרה וחצי. בסוף ליבי אמרה: \"שיהיה ברור — מה שלא יקרה מחר, את קודם כול החברה שלי.\" נרדמתי רגועה יותר.", replyEn:"We talked until eleven thirty. At the end Libi said: \"Just so it's clear — whatever happens tomorrow, you're my friend first.\" I fell asleep calmer."},
+   {he:"כותבת ביומן ומנסה להירדם", en:"Write in her diary and try to sleep", replyHe:"כתבתי שלושה עמודים. גיליתי שהכי מפחיד אותי הוא לא להפסיד — אלא לקנא בחברה הכי טובה שלי.", replyEn:"I wrote three pages. I discovered that what scared me most wasn't losing — it was being jealous of my best friend."}]},
+  quiz:[
+   {q:"מה קרה למאיה באמצע השיר?", opts:["המילים נעלמו לה והיא נאלצה להמשיך מהזיכרון","המיקרופון נפל","היא ירדה מהבמה באמצע"], a:0},
+   {q:"איך מאיה התמודדה עם התקלה?", opts:["נשמה עמוק והמשיכה מהמקום שזכרה","פרצה בבכי וברחה","התחילה שיר אחר"], a:0},
+   {q:"למה מאיה לא הייתה בטוחה במחמאה של ליבי?", opts:["היא חשבה שאולי ליבי רק מנחמת אותה","ליבי אמרה את זה בכעס","ליבי לא ראתה את ההופעה"], a:0}]},
+ { title:"לוח המודעות", paras:[
+   {he:"בבוקר, ליד *לוח המודעות*, *הצטופפה* כל השכבה.", en:"In the morning, the whole grade crowded around the bulletin board."},
+   {he:"*נדחפתי* פנימה וקראתי: \"סולו: ליבי. קול שני ראשי: מאיה.\"", en:"I pushed my way in and read: \"Solo: Libi. Lead second voice: Maya.\""},
+   {he:"קול שני. לא סולו. הרגשתי את האכזבה *שורפת* בגרון, ומיד אחריה — קנאה. ושנאתי את עצמי על הקנאה הזאת.", en:"Second voice. Not the solo. I felt the disappointment burning in my throat, and right after it — jealousy. And I hated myself for that jealousy."},
+   {he:"ליבי רצה אליי עם החיוך הכי גדול בעולם, ואני חיבקתי אותה ואמרתי \"מגיע לך\". חצי ממני התכוון לזה.", en:"Libi ran to me with the biggest smile in the world, and I hugged her and said \"you deserve it.\" Half of me meant it."},
+   {he:"בהפסקה ישבתי לבד מאחורי הספרייה. שם מצאה אותי המורה למוזיקה.", en:"At recess I sat alone behind the library. That's where the music teacher found me."},
+   {he:"\"את יודעת למה בחרתי בך לקול השני?\" היא שאלה. \"כי כש*נתקעת* על הבמה — לא ברחת. המשכת. זה *נדיר*, מאיה. סולו זה כישרון. להמשיך אחרי טעות — זה אופי.\"", en:"\"Do you know why I chose you for the second voice?\" she asked. \"Because when you got stuck on stage — you didn't run. You kept going. That's rare, Maya. A solo is talent. Continuing after a mistake — that's character.\""},
+   {he:"באותו רגע ירד לי האסימון: יש יותר מדרך אחת לנצח.", en:"At that moment it clicked: there's more than one way to win."}],
+  choice:{he:"מה מאיה עושה עם התובנה החדשה?", en:"What does Maya do with her new insight?", options:[
+   {he:"מספרת לליבי מה המורה אמרה", en:"Tell Libi what the teacher said", replyHe:"סיפרתי לה הכול, כולל על הקנאה. ליבי הקשיבה ואמרה: \"תודה שאת כנה. זאת בדיוק הסיבה שאת החברה הכי טובה שלי.\"", replyEn:"I told her everything, including about the jealousy. Libi listened and said: \"Thank you for being honest. That's exactly why you're my best friend.\""},
+   {he:"שומרת את זה לעצמה ומשקיעה בחזרות", en:"Keep it to herself and throw herself into rehearsals", replyHe:"החלטתי לתת לזמר לדבר. בחזרה הראשונה שרתי את הקול השני כאילו הוא הסולו — והמורה קרצה לי.", replyEn:"I decided to let the singing do the talking. At the first rehearsal I sang the second voice as if it were the solo — and the teacher winked at me."}]},
+  quiz:[
+   {q:"אילו שני רגשות הרגישה מאיה מול לוח המודעות?", opts:["אכזבה וקנאה","שמחה וגאווה","פחד ושעמום"], a:0},
+   {q:"לפי המורה למוזיקה, מה ההבדל בין כישרון לאופי?", opts:["סולו זה כישרון; להמשיך אחרי טעות זה אופי","כישרון חשוב יותר מאופי","אין הבדל ביניהם"], a:0},
+   {q:"מה משמעות המשפט \"יש יותר מדרך אחת לנצח\"?", opts:["אפשר להרוויח משהו חשוב גם בלי לקבל את מה שרצית","תמיד צריך לדרוש אודישן חוזר","מי שלא זוכה בסולו נכשל"], a:0}]},
+ { title:"ערב המופע", paras:[
+   {he:"בשבועות של ה*חזרות* קרה משהו מוזר: הקול שלי ושל ליבי התחברו, כאילו נולדנו לשיר ביחד.", en:"During the weeks of rehearsals something strange happened: my voice and Libi's connected, as if we were born to sing together."},
+   {he:"ערב המופע. *מאחורי הקלעים*, ליבי תפסה לי את היד. \"מאיה, יש לי *וידוי*. אני מתה מפחד.\"", en:"The night of the show. Backstage, Libi grabbed my hand. \"Maya, I have a confession. I'm scared to death.\""},
+   {he:"ליבי? מפחדת? היא שנראתה לי תמיד יציבה כמו *סלע*?", en:"Libi? Scared? The one who always seemed steady as a rock to me?"},
+   {he:"\"תסתכלי עליי כל הזמן,\" אמרתי לה. \"אם תשכחי מילה — אני איתך. ככה זה קול שני.\"", en:"\"Look at me the whole time,\" I told her. \"If you forget a word — I'm with you. That's what a second voice is for.\""},
+   {he:"עלינו לבמה. האולם היה מלא, ההורים צילמו, והאור הכחול נדלק.", en:"We went on stage. The hall was packed, the parents were filming, and the blue light came on."},
+   {he:"ליבי שרה כמו מלאך, וב*פזמון* האחרון היא עשתה משהו שלא היה בחזרות: משכה אותי קדימה, למרכז הבמה, ושרנו את הסוף ביחד. האולם קם על הרגליים.", en:"Libi sang like an angel, and in the last chorus she did something that wasn't in the rehearsals: she pulled me forward, to center stage, and we sang the ending together. The hall rose to its feet."},
+   {he:"אחר כך, מאחורי הקלעים, היא *לחשה* לי: \"לא היה לי סיכוי בלעדייך.\" ואני חשבתי לעצמי — אולי לא זכיתי בסולו, אבל זכיתי במשהו ששווה הרבה יותר.", en:"Afterwards, backstage, she whispered to me: \"I didn't stand a chance without you.\" And I thought to myself — maybe I didn't win the solo, but I won something worth much more."}],
+  quiz:[
+   {q:"מה הווידוי של ליבי מאחורי הקלעים?", opts:["שהיא מתה מפחד","שהיא לא התאמנה בכלל","שהיא רוצה לוותר על הסולו"], a:0},
+   {q:"מה עשתה ליבי בפזמון האחרון?", opts:["משכה את מאיה למרכז הבמה לשיר ביחד","שכחה את המילים וירדה מהבמה","החליפה את השיר"], a:0},
+   {q:"במה \"זכתה\" מאיה בסוף הסיפור?", opts:["בחברות חזקה ובידיעה שליבי זקוקה לה","בסולו של המופע הבא","בפרס כספי"], a:0}]}
+]},
+{ id:"diary", emoji:"🗝️", title:"היומן של סבתא", titleEn:"Grandma's diary", blurb:"מגירה נעולה, מפתח מברזל, ויומן של ילדה בת שתים־עשרה שהגיעה לארץ בלי מילה בעברית.",
+ gloss:{"מגירה":"a drawer","אוצרות":"treasures","מעטפה":"an envelope","חריקה":"a creak","כריכה":"a (book) cover","דהויה":"faded (f.)","אונייה":"a ship","ברחו":"ran away / escaped","התמלאו":"filled up","בקול רם":"out loud","מרפסת":"a balcony / porch","צירפה":"added / included (f.)","השתתקו":"went silent (pl.)","כפול":"double","להצביע":"to point","סעיף":"an item (on a list)","מנצח":"victorious","להקריא":"to read aloud","בירושה":"by inheritance"},
+ chapters:[
+ { title:"המפתח", paras:[
+   {he:"אצל סבתא שלי יש *מגירה* אחת שתמיד נעולה. מגירה תחתונה, בשידה הישנה שבחדר העבודה.", en:"At my grandma's there's one drawer that's always locked. A bottom drawer, in the old dresser in the study."},
+   {he:"בכל פעם ששאלתי מה יש בפנים, סבתא הייתה מחייכת ואומרת: \"*אוצרות*. יום אחד תקבלי את המפתח.\"", en:"Every time I asked what was inside, Grandma would smile and say: \"Treasures. One day you'll get the key.\""},
+   {he:"ביום שישי האחרון, כשבאתי לעזור לה לסדר את הבית, מצאתי על השולחן *מעטפה* עם השם שלי.", en:"Last Friday, when I came to help her tidy the house, I found an envelope with my name on the table."},
+   {he:"בפנים היה מפתח קטן מברזל, ופתק בכתב היד העגול של סבתא: \"הגיע הזמן. את בדיוק בגיל הנכון.\"", en:"Inside was a small iron key, and a note in Grandma's round handwriting: \"It's time. You're exactly the right age.\""},
+   {he:"הידיים שלי רעדו כשהכנסתי את המפתח למנעול. המגירה נפתחה ב*חריקה*.", en:"My hands trembled as I put the key in the lock. The drawer opened with a creak."},
+   {he:"בפנים הייתה מחברת אחת, עבה, עם *כריכה* כחולה *דהויה*. ועל הכריכה, באותיות של ילדה: \"היומן של רינה. פרטי!! לא לפתוח!!\"", en:"Inside was a single thick notebook with a faded blue cover. And on the cover, in a girl's handwriting: \"Rina's diary. PRIVATE!! Do not open!!\""},
+   {he:"רינה. זאת סבתא שלי. ולפי התאריך בעמוד הראשון — היא כתבה את זה בדיוק בגיל שלי.", en:"Rina. That's my grandma. And according to the date on the first page — she wrote it at exactly my age."}],
+  choice:{he:"מה ליה עושה עם היומן?", en:"What does Leah do with the diary?", options:[
+   {he:"פותחת וקוראת מיד, שם על הרצפה", en:"Open it and read immediately, right there on the floor", replyHe:"התיישבתי על הרצפה ליד השידה ופתחתי. הרי סבתא בעצמה נתנה לי את המפתח — זאת הזמנה, לא פריצה.", replyEn:"I sat down on the floor next to the dresser and opened it. After all, Grandma herself gave me the key — that's an invitation, not a break-in."},
+   {he:"מתקשרת לסבתא לבקש רשות רשמית", en:"Call Grandma to ask for official permission", replyHe:"התקשרתי. סבתא צחקה צחוק ארוך ואמרה: \"כתוב על המעטפה את השם שלך, לא? קראי, ילדה. ותביאי אותו בחזרה בלב.\"", replyEn:"I called. Grandma laughed a long laugh and said: \"Your name is on the envelope, isn't it? Read, child. And bring it back in your heart.\""}]},
+  quiz:[
+   {q:"מה סבתא נהגה לענות כששאלו על המגירה?", opts:["\"אוצרות. יום אחד תקבלי את המפתח\"","\"אין שם כלום\"","\"זה של סבא, אסור לגעת\""], a:0},
+   {q:"מה היה בתוך המגירה?", opts:["יומן ישן עם כריכה כחולה דהויה","תכשיטים וכסף","תמונות מהחתונה"], a:0},
+   {q:"למה דווקא עכשיו סבתא נתנה לליה את המפתח?", opts:["כי ליה הגיעה בדיוק לגיל שבו סבתא כתבה את היומן","כי סבתא עוברת דירה","כי ליה מצאה את המפתח לבד"], a:0}]},
+ { title:"רגינה", paras:[
+   {he:"\"היום ירדנו מה*אונייה*,\" נכתב בעמוד הראשון. \"אמא אמרה שמהיום קוראים לי רינה, לא רֶגִינָה. שם ישראלי. אני לא בטוחה שאני מכירה את הילדה החדשה הזאת.\"", en:"\"Today we got off the ship,\" the first page said. \"Mom said that from today my name is Rina, not Regina. An Israeli name. I'm not sure I know this new girl.\""},
+   {he:"שכחתי לנשום. סבתא שלי לא נולדה כאן?", en:"I forgot to breathe. My grandma wasn't born here?"},
+   {he:"המשכתי לקרוא. \"בבית הספר כולם מדברים מהר נורא. היום המורה שאלה אותי שאלה, וכל המילים *ברחו* לי. הכיתה צחקה. החלטתי לא לדבר יותר.\"", en:"I kept reading. \"At school everyone talks terribly fast. Today the teacher asked me a question, and all my words ran away. The class laughed. I've decided not to speak anymore.\""},
+   {he:"העיניים שלי *התמלאו* דמעות. אני מכירה את ההרגשה הזאת. מכירה מבפנים.", en:"My eyes filled with tears. I know that feeling. I know it from the inside."},
+   {he:"גם לי יש שפה אחת בבית ושפה אחרת בחוץ. גם לי מילים בורחות לפעמים, בדיוק ברגע שהכי צריך אותן.", en:"I also have one language at home and another outside. My words also run away sometimes, exactly when I need them most."},
+   {he:"בעמוד הבא רינה כתבה משהו שגרם לי לחייך: \"מצאתי פתרון. כל ערב אני לומדת חמש מילים חדשות ואומרת אותן *בקול רם* מול המראה. המראה לא צוחקת.\"", en:"On the next page Rina wrote something that made me smile: \"I found a solution. Every evening I learn five new words and say them out loud in front of the mirror. The mirror doesn't laugh.\""},
+   {he:"סגרתי את היומן והחלטתי: ביום ראשון אני חוזרת לסבתא. יש לי מיליון שאלות.", en:"I closed the diary and decided: on Sunday I'm going back to Grandma's. I have a million questions."}],
+  choice:{he:"מה הכי מסקרן את ליה?", en:"What is Leah most curious about?", options:[
+   {he:"מה קרה לרגינה — הילדה עם השם הישן", en:"What happened to Regina — the girl with the old name", replyHe:"סימנתי לעצמי את השאלה במחברת: לאן נעלמת ילדה כשמחליפים לה את השם?", replyEn:"I wrote the question down for myself: where does a girl disappear to when they change her name?"},
+   {he:"אם הטריק עם המראה באמת עבד", en:"Whether the mirror trick actually worked", replyHe:"באותו ערב ניסיתי בעצמי: חמש מילים, בקול רם, מול המראה. מוזר? אולי. אבל המראה באמת לא צחקה.", replyEn:"That evening I tried it myself: five words, out loud, in front of the mirror. Weird? Maybe. But the mirror really didn't laugh."}]},
+  quiz:[
+   {q:"למה שינו לרגינה את השם לרינה?", opts:["כדי שיהיה לה שם ישראלי אחרי העלייה לארץ","כי היא ביקשה שם חדש","כי היו שתי רגינות בכיתה"], a:0},
+   {q:"למה רינה החליטה \"לא לדבר יותר\"?", opts:["כי הכיתה צחקה כשהמילים ברחו לה","כי היא לא אהבה את המורה","כי היא איבדה את הקול"], a:0},
+   {q:"למה הסיפור של רינה נוגע כל כך בליה?", opts:["כי גם לה יש שפה בבית ושפה אחרת בחוץ, וגם לה מילים בורחות","כי גם היא כותבת יומן","כי היא לא אוהבת אוניות"], a:0}]},
+ { title:"במרפסת", paras:[
+   {he:"ביום ראשון אחרי הצהריים ישבנו ב*מרפסת* של סבתא, עם תה ועוגיות שקדים.", en:"On Sunday afternoon we sat on Grandma's balcony, with tea and almond cookies."},
+   {he:"\"קראת,\" היא אמרה. זאת לא הייתה שאלה. \"עד איפה הגעת?\"", en:"\"You read,\" she said. It wasn't a question. \"How far did you get?\""},
+   {he:"\"עד המראה,\" עניתי. \"סבתא... זה עבד? חמש מילים כל ערב?\"", en:"\"Up to the mirror,\" I answered. \"Grandma... did it work? Five words every evening?\""},
+   {he:"היא צחקה. \"לא מיד. לקח חודשים. אבל יום אחד, באמצע ויכוח על משחק בחצר, צעקתי משפט שלם בעברית בלי לחשוב. וכולם *השתתקו*.\"", en:"She laughed. \"Not right away. It took months. But one day, in the middle of an argument over a game in the yard, I shouted a whole sentence in Hebrew without thinking. And everyone went silent.\""},
+   {he:"\"ואז ילדה אחת אמרה: 'אז את כן יודעת לדבר!' — ו*צירפה* אותי לקבוצה שלה. מאותו יום היה לי מקום.\"", en:"\"And then one girl said: 'So you CAN talk!' — and added me to her group. From that day on, I had a place.\""},
+   {he:"\"המילים באות,\" היא אמרה ולקחה את היד שלי, \"כשמפסיקים לפחד מטעויות. טעות היא סימן שניסית.\"", en:"\"The words come,\" she said, taking my hand, \"when you stop being afraid of mistakes. A mistake is a sign that you tried.\""},
+   {he:"\"ומה קרה לרגינה?\" שאלתי בשקט. סבתא חייכה: \"רגינה לא נעלמה. היא פשוט למדה עוד שפה. ילדה עם שתי שפות היא לא חצי־חצי, ליה'לה. היא *כפול*.\"", en:"\"And what happened to Regina?\" I asked quietly. Grandma smiled: \"Regina didn't disappear. She just learned another language. A girl with two languages isn't half-and-half, Leah'le. She's double.\""}],
+  choice:{he:"מה ליה רוצה לשאול עכשיו?", en:"What does Leah want to ask now?", options:[
+   {he:"\"מה היה הריב ההוא בחצר?\"", en:"\"What was that argument in the yard about?\"", replyHe:"סבתא גיחכה: \"מחניים. מישהי טענה שהכדור פגע בי. צעקתי: 'זה לא נחשב, הייתי מחוץ למגרש!' — משפט ראשון שלי בעברית. עד היום אני זוכרת כל מילה.\"", replyEn:"Grandma chuckled: \"Dodgeball. Someone claimed the ball hit me. I shouted: 'It doesn't count, I was off the court!' — my first sentence in Hebrew. To this day I remember every word.\""},
+   {he:"\"את עדיין חולמת בשפה הישנה?\"", en:"\"Do you still dream in the old language?\"", replyHe:"סבתא שתקה רגע ארוך. \"לפעמים. ואת יודעת מה? זה הדבר הכי יפה — יש לי חלומות בשתי שפות. כפול חלומות.\"", replyEn:"Grandma was quiet for a long moment. \"Sometimes. And you know what? It's the most beautiful thing — I have dreams in two languages. Double the dreams.\""}]},
+  quiz:[
+   {q:"מתי רינה דיברה לראשונה עברית בלי לחשוב?", opts:["באמצע ויכוח על משחק בחצר","בשיעור חשבון","בטקס בבית הספר"], a:0},
+   {q:"לפי סבתא, מתי \"המילים באות\"?", opts:["כשמפסיקים לפחד מטעויות","כשלומדים רק דקדוק","כשמדברים לאט מאוד"], a:0},
+   {q:"מה פירוש המשפט \"ילדה עם שתי שפות היא כפול\"?", opts:["שתי שפות הן עושר ויתרון, לא חיסרון","צריך לבחור שפה אחת בלבד","מי שיודע שתי שפות מתבלבל תמיד"], a:0}]},
+ { title:"הרשימה", paras:[
+   {he:"בעמוד האחרון של היומן, רינה בת השתים־עשרה כתבה רשימה: \"דברים שאעשה כשאדע עברית מושלם.\"", en:"On the last page of the diary, twelve-year-old Rina had written a list: \"Things I will do when I know perfect Hebrew.\""},
+   {he:"\"אחד: להזמין פלאפל בלי *להצביע* על התמונה. שניים: לקרוא ספר שלם. שלושה: לספר בדיחה שכולם יצחקו ממנה. ארבעה: לריב — ולנצח.\"", en:"\"One: order falafel without pointing at the picture. Two: read a whole book. Three: tell a joke that makes everyone laugh. Four: have an argument — and win.\""},
+   {he:"צחקתי בקול. ליד כל *סעיף* היה וי קטן ו*מנצח*.", en:"I laughed out loud. Next to each item was a small, victorious checkmark."},
+   {he:"ומתחת לרשימה, בכתב יד חדש, סבתא הוסיפה השבוע שורה: \"חמישה: להעביר את היומן הזה למישהי שתבין אותו בדיוק כמוני.\" וי.", en:"And below the list, in fresh handwriting, Grandma had added a line this week: \"Five: pass this diary on to someone who will understand it exactly like I did.\" Check."},
+   {he:"לקחתי עט, ובעמוד חדש התחלתי רשימה משלי: \"הדברים שאני אעשה בעברית.\"", en:"I took a pen, and on a new page I started a list of my own: \"Things I will do in Hebrew.\""},
+   {he:"כתבתי, מחקתי, וכתבתי שוב. ובסוף הוספתי סעיף אחרון, הכי חשוב: \"*להקריא* לסבתא את היומן שלי. בעוד חמישים שנה.\"", en:"I wrote, erased, and wrote again. And at the end I added one last item, the most important: \"Read my own diary aloud to my grandma. Fifty years from now.\""},
+   {he:"מהמטבח שמעתי את סבתא צוחקת. כנראה קראה לי את המחשבות. אצלנו במשפחה, מסתבר, זה עובר *בירושה*.", en:"From the kitchen I heard Grandma laughing. She probably read my mind. In our family, it turns out, that's hereditary."}],
+  quiz:[
+   {q:"מה היה הסעיף הרביעי ברשימה של רינה?", opts:["לריב — ולנצח","לשיר בטקס","לכתוב ספר"], a:0},
+   {q:"מה מלמדים סימני הווי שליד הסעיפים?", opts:["שרינה הגשימה את כל המטרות שלה","שרינה ויתרה על הרשימה","שמישהו אחר סימן אותם בטעות"], a:0},
+   {q:"מה אפשר להסיק מהסעיף שסבתא הוסיפה השבוע?", opts:["שהיא תכננה להעביר את היומן לליה, וזה חלק מהמטרות שלה","שהיא שכחה מהיומן לגמרי","שהיא רוצה למכור את היומן"], a:0}]}
+]}
+];
+</script>
+
+<script id="data-speak">
+const SPEAK_LEVELS = [
+{ id:"daily", icon:"☀️", name:"יום־יום", nameEn:"Everyday life", items:[
+ {en:"I didn't manage to finish my homework because we got back late.", he:"לא הספקתי לסיים את השיעורים כי חזרנו מאוחר."},
+ {en:"Can we push it to tomorrow? I'm dying of tiredness.", he:"אפשר לדחות את זה למחר? אני מתה מעייפות."},
+ {en:"I lost my water bottle — any chance you've seen it?", he:"איבדתי את הבקבוק שלי, במקרה ראית אותו?"},
+ {en:"Remind me to bring your book back tomorrow.", he:"תזכירי לי להחזיר לך את הספר מחר."},
+ {en:"We almost missed the bus — we ran like crazy.", he:"כמעט פספסנו את האוטובוס, רצנו כמו משוגעות."},
+ {en:"I didn't mean it — it came out wrong.", he:"לא התכוונתי לזה, זה יצא לי לא טוב."},
+ {en:"Turns out the test was postponed to next week.", he:"מסתבר שהמבחן נדחה לשבוע הבא."},
+ {en:"Do you feel like doing something after school?", he:"בא לך לעשות משהו אחרי הלימודים?"},
+ {en:"I don't have the energy for this right now — let's talk tonight.", he:"אין לי כוח לזה עכשיו, נדבר בערב."},
+ {en:"I forgot to charge my phone and it died in the middle of the day.", he:"שכחתי להטעין את הטלפון והוא מת באמצע היום."},
+ {en:"Can you explain it again? I got lost in the middle.", he:"תסבירי שוב? הלכתי לאיבוד באמצע."},
+ {en:"I managed on my own in the end, but thanks for offering.", he:"הסתדרתי לבד בסוף, אבל תודה שהצעת."},
+ {en:"We'd better leave now — later there will be traffic.", he:"עדיף שנצא עכשיו, אחר כך יהיה פקוק."},
+ {en:"I feel awkward asking, but can I join you guys?", he:"לא נעים לי לבקש, אבל אפשר להצטרף אליכן?"},
+ {en:"How much does it come out to per person if we split it?", he:"כמה זה יוצא לכל אחת אם מתחלקים?"},
+ {en:"Save me a seat — I'll be there in five minutes.", he:"תשמרי לי מקום, אני מגיעה עוד חמש דקות."}
+]},
+{ id:"opinions", icon:"💬", name:"רגשות ודעות", nameEn:"Feelings & opinions", items:[
+ {en:"In my opinion it's simply not fair that only some people got an extension.", he:"לדעתי זה פשוט לא הוגן שרק חלק קיבלו הארכה."},
+ {en:"I was hurt by what she said, even if it was a joke.", he:"נעלבתי ממה שהיא אמרה, גם אם זה היה בצחוק."},
+ {en:"I'm proud of myself — I put a huge amount into this.", he:"אני גאה בעצמי, השקעתי בזה המון."},
+ {en:"It's frustrating to practice so much and not improve.", he:"זה מתסכל להתאמן כל כך הרבה ולא להשתפר."},
+ {en:"I was disappointed by the ending — I expected something completely different.", he:"התאכזבתי מהסוף, ציפיתי למשהו אחר לגמרי."},
+ {en:"I'm torn between two options and can't decide.", he:"אני מתלבטת בין שתי אפשרויות ולא מצליחה להחליט."},
+ {en:"She deserves it — she worked on it more than anyone.", he:"מגיע לה, היא עבדה על זה יותר מכולם."},
+ {en:"Don't take it personally — it has nothing to do with you.", he:"אל תיקחי את זה אישית, זה בכלל לא קשור אלייך."},
+ {en:"I prefer to tell the truth, even when it's unpleasant.", he:"אני מעדיפה להגיד את האמת, גם כשזה לא נעים."},
+ {en:"My feeling is that something here doesn't add up.", he:"ההרגשה שלי היא שמשהו פה לא מסתדר."},
+ {en:"I trust her completely (with my eyes closed).", he:"אני סומכת עליה בעיניים עצומות."},
+ {en:"It's worth a try — what's the worst that could happen?", he:"שווה לנסות, מה כבר יכול לקרות?"},
+ {en:"I felt enormous relief when it was over.", he:"הרגשתי הקלה עצומה כשזה נגמר."},
+ {en:"I admit I was wrong, and that's not easy for me to say.", he:"אני מודה שטעיתי, וזה לא קל לי להגיד."},
+ {en:"That sounds exaggerated to me — let's check before we panic.", he:"זה נשמע לי מוגזם, בואי נבדוק לפני שנילחץ."},
+ {en:"Good for you — I was genuinely impressed.", he:"כל הכבוד לך, באמת התרשמתי."}
+]},
+{ id:"pro", icon:"🎓", name:"כמו נואמת", nameEn:"Like a debater", items:[
+ {en:"Admittedly this subject is hard for me, but I'm not giving up.", he:"אמנם המקצוע הזה קשה לי, אבל אני לא מוותרת."},
+ {en:"On one hand I want to stay; on the other, I promised to be back early.", he:"מצד אחד בא לי להישאר, מצד שני הבטחתי לחזור מוקדם."},
+ {en:"Contrary to what everyone thinks, I actually like oral exams.", he:"בניגוד למה שכולם חושבים, אני דווקא אוהבת מבחנים בעל פה."},
+ {en:"As a result of the rain, the trip was postponed by two weeks.", he:"כתוצאה מהגשם, הטיול נדחה בשבועיים."},
+ {en:"Therefore, I suggest we start earlier.", he:"לפיכך אני מציעה שנתחיל מוקדם יותר."},
+ {en:"Thanks to her perseverance, she reached the finals.", he:"בזכות ההתמדה שלה היא הגיעה לגמר."},
+ {en:"It's important to emphasize that this is only the beginning.", he:"חשוב להדגיש שזאת רק ההתחלה."},
+ {en:"One can conclude from this that the plan worked.", he:"אפשר להסיק מזה שהתוכנית עבדה."},
+ {en:"Compared to last year, the show was far more professional.", he:"בהשוואה לשנה שעברה, המופע היה מקצועי הרבה יותר."},
+ {en:"On the other hand, there are those who prefer to work alone.", he:"לעומת זאת, יש כאלה שמעדיפים לעבוד לבד."},
+ {en:"In fact, this is the first time I'm trying something like this.", he:"למעשה, זאת הפעם הראשונה שאני מנסה דבר כזה."},
+ {en:"Most likely we'll have to find a different solution.", he:"ככל הנראה נצטרך למצוא פתרון אחר."},
+ {en:"I object to the idea, and I have three reasons.", he:"אני מתנגדת לרעיון, ויש לי שלושה נימוקים."},
+ {en:"In order to succeed, we must start preparing right now.", he:"על מנת להצליח, חייבים להתחיל להתכונן כבר עכשיו."},
+ {en:"My conclusion is that cooperating is better than competing.", he:"המסקנה שלי היא שעדיף לשתף פעולה מאשר להתחרות."},
+ {en:"There's no doubt the effort paid off in the end.", he:"אין ספק שההשקעה השתלמה בסופו של דבר."}
+]}
+];
+
+const LEVELS = [
+ {xp:0, name:"מתחילה"},{xp:100, name:"סבבה"},{xp:250, name:"על הגל"},{xp:450, name:"תותחית"},
+ {xp:700, name:"חבל על הזמן"},{xp:1000, name:"אלופה"},{xp:1400, name:"מלכת המילים"},
+ {xp:1900, name:"אגדה"},{xp:2600, name:"פנומנלית"},{xp:3400, name:"אגדה מהלכת"}
+];
+
+const BADGES = [
+ {id:"first", ico:"🌱", name:"First steps", cond:s=>s.xp>0},
+ {id:"streak3", ico:"🔥", name:"3-day streak", cond:s=>s.bestStreak>=3},
+ {id:"streak7", ico:"🌋", name:"7-day streak", cond:s=>s.bestStreak>=7},
+ {id:"words25", ico:"🃏", name:"25 words", cond:s=>learnedCount()>=25},
+ {id:"words60", ico:"👑", name:"60 words", cond:s=>learnedCount()>=60},
+ {id:"story1", ico:"📖", name:"First story", cond:s=>Object.values(s.storyProg).some(p=>p.done>=1)},
+ {id:"bookworm", ico:"🦉", name:"All stories", cond:s=>STORIES.every(st=>(s.storyProg[st.id]||{done:0}).done>=st.chapters.length)},
+ {id:"speak50", ico:"🎤", name:"50 spoken", cond:s=>s.spokenCount>=50}
+];
+</script>
+
+<script id="data-tts">
+/* Vocalized (nikud) spellings fed to the TTS engine so isolated words are pronounced
+   correctly. Keys must exactly match vocab `he` strings and story gloss keys (check.js
+   enforces coverage). Values use proper vocalized spelling, which may drop ktiv-male letters. */
+const TTS_FIX = {
+/* idioms */
+"אין לי מושג":"אֵין לִי מוּשָׂג","על קצה הלשון":"עַל קְצֵה הַלָּשׁוֹן","לשבור את הראש":"לִשְׁבֹּר אֶת הָרֹאשׁ",
+"ירד לי האסימון":"יָרַד לִי הָאֲסִימוֹן","לשים לב":"לָשִׂים לֵב","לעשות רושם":"לַעֲשׂוֹת רֹשֶׁם",
+"ברגע האחרון":"בָּרֶגַע הָאַחֲרוֹן","בלית ברירה":"בְּלֵית בְּרֵרָה","מצא חן בעיניי":"מָצָא חֵן בְּעֵינַי",
+"לקחת ללב":"לָקַחַת לַלֵּב","נשבר לי":"נִשְׁבַּר לִי","להעביר את הזמן":"לְהַעֲבִיר אֶת הַזְּמַן",
+"בקטנה":"בַּקְּטַנָּה","להתחרפן":"לְהִתְחַרְפֵן","לפספס":"לְפַסְפֵס","להתבאס":"לְהִתְבָּאֵס",
+"חסר טעם":"חֲסַר טַעַם","במקומך":"בִּמְקוֹמֵךְ","חבל על הזמן":"חֲבָל עַל הַזְּמַן","עדיף":"עָדִיף",
+/* feelings */
+"אכזבה":"אַכְזָבָה","תסכול":"תִּסְכּוּל","הקלה":"הֲקָלָה","חרטה":"חֲרָטָה","מבוכה":"מְבוּכָה",
+"געגועים":"גַּעְגּוּעִים","ביטחון עצמי":"בִּטָּחוֹן עַצְמִי","סקרנות":"סַקְרָנוּת","התלהבות":"הִתְלַהֲבוּת",
+"נאמנות":"נֶאֱמָנוּת","כנות":"כֵּנוּת","אומץ":"אֹמֶץ","עקשנית":"עַקְשָׁנִית","רגישה":"רְגִישָׁה",
+"אדישה":"אֲדִישָׁה","אכפתית":"אִכְפַּתִּית","קנאה":"קִנְאָה","שאפתנית":"שַׁאַפְתָּנִית","צנועה":"צְנוּעָה","סבלנות":"סַבְלָנוּת",
+/* school */
+"רעיון מרכזי":"רַעְיוֹן מֶרְכָּזִי","פסקה":"פִּסְקָה","להסיק":"לְהַסִּיק","מסקנה":"מַסְקָנָה","לנמק":"לְנַמֵּק",
+"טיעון":"טִעוּן","עובדה":"עֻבְדָּה","דעה":"דֵּעָה","סיבה ותוצאה":"סִבָּה וְתוֹצָאָה","מטרה":"מַטָּרָה",
+"להשוות":"לְהַשְׁווֹת","לסכם":"לְסַכֵּם","להדגיש":"לְהַדְגִּישׁ","לפרש":"לְפָרֵשׁ","לצטט":"לְצַטֵּט",
+"מקור":"מָקוֹר","תהליך":"תַּהֲלִיךְ","תופעה":"תּוֹפָעָה","השערה":"הַשְׁעָרָה","משמעות":"מַשְׁמָעוּת",
+/* connectors */
+"אולם":"אוּלָם","אמנם... אבל":"אָמְנָם... אֲבָל","לעומת זאת":"לְעֻמַּת זֹאת","מצד אחד... מצד שני":"מִצַּד אֶחָד... מִצַּד שֵׁנִי",
+"כלומר":"כְּלוֹמַר","לפיכך":"לְפִיכָךְ","כתוצאה מכך":"כְּתוֹצָאָה מִכָּךְ","עקב":"עֵקֶב","בזכות":"בִּזְכוּת",
+"בניגוד ל...":"בְּנִגּוּד לְ","בהשוואה ל...":"בְּהַשְׁוָאָה לְ","על מנת":"עַל מְנָת","בנוסף":"בְּנוֹסָף",
+"למעשה":"לְמַעֲשֶׂה","בעיקר":"בְּעִקָּר","לחלוטין":"לַחֲלוּטִין","בהדרגה":"בְּהַדְרָגָה",
+"לעיתים קרובות":"לְעִתִּים קְרוֹבוֹת","לעיתים רחוקות":"לְעִתִּים רְחוֹקוֹת","ככל הנראה":"כְּכָל הַנִּרְאֶה",
+/* verbs */
+"להתמודד עם":"לְהִתְמוֹדֵד עִם","לשקול":"לִשְׁקֹל","להעריך":"לְהַעֲרִיךְ","להשקיע":"לְהַשְׁקִיעַ","לתרום":"לִתְרֹם",
+"להשפיע על":"לְהַשְׁפִּיעַ עַל","ליזום":"לִיזֹם","לשתף פעולה":"לְשַׁתֵּף פְּעֻלָּה","להתמיד":"לְהַתְמִיד",
+"להתגבר על":"לְהִתְגַּבֵּר עַל","להביע":"לְהַבִּיעַ","להצדיק":"לְהַצְדִּיק","להתנגד":"לְהִתְנַגֵּד",
+"להימנע מ...":"לְהִמָּנַע מִ","לצפות":"לְצַפּוֹת","להגשים":"לְהַגְשִׁים","להתאכזב":"לְהִתְאַכְזֵב",
+"להתרשם":"לְהִתְרַשֵּׁם","להתעלם מ...":"לְהִתְעַלֵּם מִ","להתאפק":"לְהִתְאַפֵּק",
+/* nouns */
+"הזדמנות":"הִזְדַּמְּנוּת","אתגר":"אֶתְגָּר","הישג":"הֶשֵּׂג","כישרון":"כִּשָּׁרוֹן","חוויה":"חֲוָיָה",
+"זיכרון":"זִכָּרוֹן","דמיון":"דִּמְיוֹן","השראה":"הַשְׁרָאָה","מחויבות":"מְחֻיָּבוּת","עצמאות":"עַצְמָאוּת",
+"אחריות":"אַחְרָיוּת","ביקורת":"בִּקֹּרֶת","פתרון":"פִּתְרוֹן","פשרה":"פְּשָׁרָה","ויכוח":"וִכּוּחַ",
+"יתרון":"יִתְרוֹן","חיסרון":"חִסָּרוֹן","הרגל":"הֶרְגֵּל","שגרה":"שִׁגְרָה","סיכוי":"סִכּוּי",
+/* story gloss: shadow */
+"רטט":"רָטַט","נשבעה":"נִשְׁבְּעָה","טען":"טָעַן","השתתקתי":"הִשְׁתַּתַּקְתִּי","שילוב":"שִׁלּוּב",
+"חשודים":"חֲשׁוּדִים","מסוגלת":"מְסֻגֶּלֶת","הצטרפה":"הִצְטָרְפָה","ויתרה":"וִתְּרָה","בקצה":"בַּקָּצֶה",
+"להאשים":"לְהַאֲשִׁים","מלכודת":"מַלְכֹּדֶת","בהיתי":"בָּהִיתִי","הוכחה":"הוֹכָחָה","בושה":"בּוּשָׁה",
+"להפך":"לְהֵפֶךְ","קפאה":"קָפְאָה","לבסוף":"לְבַסּוֹף","מפרגן":"מְפַרְגֵּן","בתנאי":"בִּתְנַאי","שותפה":"שֻׁתָּפָה",
+/* story gloss: audition */
+"הודיעה":"הוֹדִיעָה","התפוצצה":"הִתְפּוֹצְצָה","קרב":"קְרָב","מראה":"מַרְאָה","רעדו":"רָעֲדוּ",
+"סנוור":"סִנְוֵר","נוראי":"נוֹרָאִי","מנחמת":"מְנַחֶמֶת","לוח המודעות":"לוּחַ הַמּוֹדָעוֹת",
+"הצטופפה":"הִצְטוֹפְפָה","נדחפתי":"נִדְחַפְתִּי","שורפת":"שׂוֹרֶפֶת","נתקעת":"נִתְקַעַת","נדיר":"נָדִיר",
+"חזרות":"חֲזָרוֹת","מאחורי הקלעים":"מֵאֲחוֹרֵי הַקְּלָעִים","וידוי":"וִדּוּי","סלע":"סֶלַע","לחשה":"לָחֲשָׁה","פזמון":"פִּזְמוֹן",
+/* story gloss: diary */
+"מגירה":"מְגֵרָה","אוצרות":"אוֹצָרוֹת","מעטפה":"מַעֲטָפָה","חריקה":"חֲרִיקָה","כריכה":"כְּרִיכָה",
+"דהויה":"דְּהוּיָה","אונייה":"אֳנִיָּה","ברחו":"בָּרְחוּ","התמלאו":"הִתְמַלְּאוּ","בקול רם":"בְּקוֹל רָם",
+"מרפסת":"מִרְפֶּסֶת","צירפה":"צֵרְפָה","השתתקו":"הִשְׁתַּתְּקוּ","כפול":"כָּפוּל","להצביע":"לְהַצְבִּיעַ",
+"סעיף":"סָעִיף","מנצח":"מְנַצֵּחַ","להקריא":"לְהַקְרִיא","בירושה":"בִּירֻשָּׁה"
+};
+</script>
+
+<script id="app-logic">
+"use strict";
+/* ================= state ================= */
+const SKEY="sababa-v1";
+const defaultState=()=>({xp:0, streak:0, bestStreak:0, lastActive:null,
+  srs:{}, storyProg:{}, spokenCount:0, badges:[],
+  daily:{day:null, words:0, paras:0, speaks:0, q1:false, q2:false, q3:false}});
+let S=defaultState();
+try{ const raw=localStorage.getItem(SKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
+const save=()=>{ try{ localStorage.setItem(SKEY, JSON.stringify(S)); }catch(e){} };
+const todayStr=()=>new Date().toISOString().slice(0,10);
+function ensureDaily(){ const t=todayStr(); if(S.daily.day!==t){ S.daily={day:t, words:0, paras:0, speaks:0, q1:false, q2:false, q3:false}; save(); } }
+function touchStreak(){
+  const t=todayStr();
+  if(S.lastActive===t) return;
+  const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  S.streak = (S.lastActive===y) ? S.streak+1 : 1;
+  S.bestStreak=Math.max(S.bestStreak,S.streak);
+  S.lastActive=t; save(); paintTop();
+}
+
+/* ================= xp & levels ================= */
+function levelIdx(){ let i=0; for(let k=0;k<LEVELS.length;k++) if(S.xp>=LEVELS[k].xp) i=k; return i; }
+function addXp(n){
+  const before=levelIdx();
+  S.xp+=n; touchStreak(); ensureDaily();
+  const after=levelIdx();
+  save(); paintTop();
+  if(after>before){ confetti(); toast("🎉 עלית רמה! את עכשיו \""+LEVELS[after].name+"\""); }
+  checkBadges();
+}
+function paintTop(){
+  const i=levelIdx();
+  const cur=LEVELS[i].xp, next=(LEVELS[i+1]||{xp:cur+500}).xp;
+  document.getElementById("xpfill").style.width=Math.min(100,Math.round(100*(S.xp-cur)/(next-cur)))+"%";
+  document.getElementById("lvlname").textContent="Lv."+(i+1)+" · "+LEVELS[i].name+" · "+S.xp+" XP";
+  document.getElementById("streakn").textContent=S.streak;
+}
+function learnedCount(){ return Object.keys(S.srs).filter(k=>k.startsWith("w:")&&S.srs[k].b>=1).length; }
+function checkBadges(){
+  BADGES.forEach(b=>{ if(!S.badges.includes(b.id)&&b.cond(S)){ S.badges.push(b.id); save(); toast(b.ico+" New badge: "+b.name+"!"); } });
+}
+
+/* ================= srs ================= */
+const GAPS=[0,1,3,7,16,35]; /* days per box */
+function srsGet(id){ return S.srs[id]||{b:0,d:0}; }
+function srsAnswer(id, ok){
+  const it=srsGet(id);
+  it.b = ok ? Math.min(it.b+1, GAPS.length-1) : 1;
+  it.d = Date.now() + GAPS[it.b]*864e5;
+  S.srs[id]=it; save();
+}
+const isDue=id=>{ const it=S.srs[id]; return it && it.b>=1 && it.d<=Date.now(); };
+const isNew=id=>!S.srs[id];
+
+/* ================= audio ================= */
+let VOICE=null;
+function pickVoice(){
+  const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith("he"));
+  VOICE = vs.find(v=>/natural|neural|online|premium|enhanced/i.test(v.name))
+       || vs.find(v=>/google/i.test(v.name))
+       || vs[0] || null;
+}
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+let ttsWarned=false;
+function say(text, rate){
+  if(!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(TTS_FIX[text]||text);
+  if(VOICE) u.voice=VOICE; u.lang="he-IL"; u.rate=rate||0.92;
+  if(!VOICE && !ttsWarned){ ttsWarned=true; toast("Tip: no Hebrew voice installed on this device — audio may sound off."); }
+  speechSynthesis.speak(u);
+}
+let AC=null;
+function blip(ok){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.connect(g); g.connect(AC.destination); g.gain.value=0.06;
+    if(ok){ o.frequency.value=740; o.type="sine"; o.start(); o.frequency.exponentialRampToValueAtTime(1180,AC.currentTime+0.12); o.stop(AC.currentTime+0.16); }
+    else{ o.frequency.value=190; o.type="triangle"; o.start(); o.stop(AC.currentTime+0.18); }
+  }catch(e){}
+}
+
+/* ================= tiny ui helpers ================= */
+const $=sel=>document.querySelector(sel);
+const screen=$("#screen");
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+let toastT=null;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function confetti(){
+  const c=$("#confetti"), x=c.getContext("2d");
+  c.width=innerWidth; c.height=innerHeight;
+  const cols=["#FF4D6D","#FFC53D","#0FB5A6","#8B7BD8","#FF9A3D"];
+  const ps=Array.from({length:120},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*0.5,
+    v:2+Math.random()*4, r:3+Math.random()*5, a:Math.random()*6.28, col:cols[Math.floor(Math.random()*cols.length)]}));
+  let n=0; (function tick(){ x.clearRect(0,0,c.width,c.height);
+    ps.forEach(p=>{ p.y+=p.v; p.a+=0.1; x.save(); x.translate(p.x,p.y); x.rotate(p.a); x.fillStyle=p.col; x.fillRect(-p.r,-p.r/2,p.r*2,p.r); x.restore(); });
+    if(++n<110) requestAnimationFrame(tick); else x.clearRect(0,0,c.width,c.height); })();
+}
+const MASCOT='<svg id="mascot" viewBox="0 0 100 100" aria-hidden="true"><g stroke="#2B2140" stroke-width="3" stroke-linejoin="round"><polygon points="22,38 28,10 46,28" fill="#FF9A3D"/><polygon points="78,38 72,10 54,28" fill="#FF9A3D"/><circle cx="50" cy="55" r="34" fill="#FF9A3D"/><circle cx="38" cy="50" r="4.5" fill="#2B2140" stroke="none"/><circle cx="62" cy="50" r="4.5" fill="#2B2140" stroke="none"/><path d="M46 62 Q50 66 54 62" fill="none" stroke-linecap="round"/><path d="M50 58 l0 4" stroke-linecap="round"/><path d="M20 58 L34 60 M20 68 L34 65 M80 58 L66 60 M80 68 L66 65" stroke-width="2" stroke-linecap="round"/><path d="M35 78 Q50 86 65 78" fill="none" stroke-linecap="round" stroke-dasharray="0"/></g><ellipse cx="50" cy="43" rx="12" ry="6" fill="#FFD9AD" opacity="0.6"/></svg>';
+
+/* ================= tabs ================= */
+let TAB="home";
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  TAB=b.dataset.tab;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===b));
+  render();
+}));
+function render(){ ensureDaily(); ({home:renderHome, words:renderPacks, stories:renderStories, speak:renderSpeakLevels})[TAB](); window.scrollTo(0,0); }
+
+/* ================= home ================= */
+const TIPS=[
+ ["טעות היא סימן שניסית.","A mistake is a sign that you tried."],
+ ["חמש מילים בקול רם מול המראה. המראה לא צוחקת.","Five words out loud in front of the mirror. The mirror doesn't laugh."],
+ ["ילדה עם שתי שפות היא לא חצי־חצי. היא כפול.","A girl with two languages isn't half-and-half. She's double."],
+ ["לאט לאט — וכל יום קצת.","Little by little — and a bit every day."],
+ ["המילים באות כשמפסיקים לפחד מטעויות.","The words come when you stop fearing mistakes."]
+];
+function questRow(done,total,ico,txt){
+  const d=done>=total;
+  return '<div class="quest'+(d?" done":"")+'"><div class="qico">'+(d?"✅":ico)+'</div><div class="qtxt">'+txt+'</div><div class="qprog">'+Math.min(done,total)+"/"+total+"</div></div>";
+}
+function renderHome(){
+  const tip=TIPS[new Date().getDate()%TIPS.length];
+  const chaptersRead=Object.values(S.storyProg).reduce((n,p)=>n+(p.done||0),0);
+  screen.innerHTML=
+   '<div class="card"><div id="mascot-row">'+MASCOT+
+     '<div class="bubble"><div class="he" style="font-size:1.05rem">'+tip[0]+'</div><div class="small">'+tip[1]+'</div></div></div></div>'
+  +'<div class="card"><div class="eyebrow">Today’s quests · המשימות של היום</div>'
+    + questRow(S.daily.words,10,"🃏","Practice 10 words")
+    + questRow(S.daily.paras,7,"📖","Read a story chapter")
+    + questRow(S.daily.speaks,5,"🎤","Speak 5 sentences out loud")
+  +'</div>'
+  +'<div class="row" style="margin-bottom:14px">'
+    +'<button class="btn primary grow" id="go-review">🃏 Words</button>'
+    +'<button class="btn teal grow" id="go-story">📖 Story</button>'
+    +'<button class="btn sun grow" id="go-speak">🎤 Speak</button></div>'
+  +'<div class="card"><div class="eyebrow">Trophies · המדליות שלי</div><div style="height:8px"></div><div class="badgegrid">'
+    + BADGES.map(b=>'<div class="badge'+(S.badges.includes(b.id)?" won":"")+'"><div class="bico">'+b.ico+'</div><div class="bname">'+b.name+'</div></div>').join("")
+  +'</div></div>'
+  +'<div class="card center small">'+learnedCount()+" words learned · "+chaptersRead+" chapters read · "+S.spokenCount+" sentences spoken</div>";
+  $("#go-review").onclick=()=>switchTab("words");
+  $("#go-story").onclick=()=>switchTab("stories");
+  $("#go-speak").onclick=()=>switchTab("speak");
+}
+function switchTab(t){ document.querySelector('.tab[data-tab="'+t+'"]').click(); }
+
+/* ================= words ================= */
+function packStats(p){
+  let learned=0,due=0;
+  p.words.forEach((w,i)=>{ const id="w:"+p.id+":"+i; if(srsGet(id).b>=1) learned++; if(isDue(id)) due++; });
+  return {learned,due};
+}
+function renderPacks(){
+  const totalDue=VOCAB_PACKS.reduce((n,p)=>n+packStats(p).due,0);
+  screen.innerHTML='<h1>🃏 מילים</h1>'
+  +(totalDue?'<button class="btn primary wide" id="reviewall" style="margin-bottom:14px">⚡ Review time! '+totalDue+' words are ready</button>':"")
+  +'<div class="packgrid">'
+  + VOCAB_PACKS.map(p=>{ const st=packStats(p);
+     return '<button class="pack" data-pack="'+p.id+'"><div class="pico">'+p.icon+'</div><div class="pname he">'+p.name+'</div><div class="pen">'+p.nameEn+'</div>'
+      +'<div class="meter"><i style="width:'+Math.round(100*st.learned/p.words.length)+'%"></i></div>'
+      +'<div class="small">'+st.learned+"/"+p.words.length+(st.due?" · "+st.due+" due 🔔":"")+"</div></button>"; }).join("")
+  +'</div>';
+  document.querySelectorAll(".pack").forEach(el=>el.onclick=()=>startWordSession(el.dataset.pack));
+  if($("#reviewall")) $("#reviewall").onclick=()=>startWordSession(null);
+}
+function buildQueue(packId){
+  let pool=[];
+  VOCAB_PACKS.forEach(p=>{ if(packId&&p.id!==packId) return;
+    p.words.forEach((w,i)=>pool.push({id:"w:"+p.id+":"+i, w, p})); });
+  const due=pool.filter(x=>isDue(x.id));
+  const fresh=pool.filter(x=>isNew(x.id));
+  let q=shuffle(due).slice(0,10);
+  if(q.length<10) q=q.concat(shuffle(fresh).slice(0,Math.min(8,10-q.length)));
+  if(q.length<4) q=q.concat(shuffle(pool.filter(x=>!q.includes(x))).slice(0,6-q.length));
+  return shuffle(q);
+}
+let WS=null; /* word session */
+function startWordSession(packId){
+  const q=buildQueue(packId);
+  if(!q.length){ toast("No words here yet!"); return; }
+  WS={q, i:0, right:0, total:q.length, packId};
+  wordStep();
+}
+function distractors(item, field){
+  /* same-pack first: semantically close options are much harder to guess */
+  const same=[...new Set(item.p.words.filter(w=>w!==item.w).map(w=>w[field]))];
+  let pool=shuffle(same).slice(0,3);
+  if(pool.length<3){
+    const rest=[]; VOCAB_PACKS.forEach(p=>p.words.forEach(w=>{ if(w!==item.w&&!pool.includes(w[field])) rest.push(w[field]); }));
+    pool=pool.concat(shuffle([...new Set(rest)]).slice(0,3-pool.length));
+  }
+  return pool;
+}
+function wordStep(){
+  if(WS.i>=WS.q.length) return wordDone();
+  const item=WS.q[WS.i], w=item.w;
+  const canAudio=("speechSynthesis" in window);
+  const canCloze=w.ex.includes(w.he);
+  const box=srsGet(item.id).b;
+  const canType=box>=2 && w.he.split(" ").length<=2;
+  /* mastery-based difficulty: known words graduate to cloze/typing */
+  const easy=[0,1]; if(canAudio) easy.push(2); if(canCloze) easy.push(3);
+  const hard=[]; if(canCloze) hard.push(3); if(canType) hard.push(4,4);
+  const t=(box>=2 && hard.length && Math.random()<0.75)
+    ? hard[Math.floor(Math.random()*hard.length)]
+    : easy[Math.floor(Math.random()*easy.length)];
+  if(t===4) return typeStep(item);
+  let promptHtml, opts, correct, optClass="";
+  if(t===0){ promptHtml='<div class="big-he he">'+esc(w.he)+'</div><div class="small">What does it mean?</div>'; correct=w.en; opts=[w.en].concat(distractors(item,"en")); }
+  else if(t===1){ promptHtml='<div style="font-size:1.25rem;font-weight:800">'+esc(w.en)+'</div><div class="small">How do you say it?</div>'; correct=w.he; opts=[w.he].concat(distractors(item,"he")); optClass=" he"; }
+  else if(t===2){ promptHtml='<button class="speakbtn" id="playword">🔊</button><div class="small" style="margin-top:8px">Listen — what does it mean?</div>'; correct=w.en; opts=[w.en].concat(distractors(item,"en")); }
+  else { promptHtml='<div class="he" style="font-size:1.2rem;font-weight:700;line-height:1.7">'+esc(w.ex.replace(w.he,"＿＿＿"))+'</div><div class="small">Which word completes it?</div>'; correct=w.he; opts=[w.he].concat(distractors(item,"he")); optClass=" he"; }
+  screen.innerHTML='<div class="sessionbar"><button class="btn ghost" id="quit">✕</button><div class="meter"><i style="width:'+Math.round(100*WS.i/WS.total)+'%"></i></div><span class="pill">'+(WS.i+1)+"/"+WS.total+'</span></div>'
+   +'<div class="card prompt-card">'+promptHtml+'</div>'
+   +'<div class="opts">'+shuffle(opts).map(o=>'<button class="opt'+optClass+'" data-v="'+esc(o)+'">'+esc(o)+'</button>').join("")+'</div>'
+   +'<div id="after"></div>';
+  $("#quit").onclick=()=>{ WS=null; renderPacks(); };
+  if(t===2){ $("#playword").onclick=()=>say(w.he); setTimeout(()=>say(w.he),250); }
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.v===correct;
+    document.querySelectorAll(".opt").forEach(x=>{ x.disabled=true; if(x.dataset.v===correct) x.classList.add(ok?"correct":"reveal"); });
+    if(!ok) b.classList.add("wrong");
+    blip(ok);
+    srsAnswer(item.id, ok);
+    ensureDaily(); S.daily.words++; save(); questCheck();
+    if(ok){ WS.right++; addXp(10); } else { WS.q.push(item); WS.total++; addXp(2); }
+    $("#after").innerHTML='<div class="examplebox"><div class="he" style="font-size:1.05rem">'+esc(w.ex)+' <button class="tinybtn" id="playex">🔊</button></div><div class="small">'+esc(w.exEn)+'</div></div>'
+      +'<button class="btn primary wide" id="next" style="margin-top:12px">'+(ok?"Next ➜":"Got it — try again later ➜")+'</button>';
+    $("#playex").onclick=()=>say(w.ex);
+    $("#next").onclick=()=>{ WS.i++; wordStep(); };
+    $("#next").focus();
+  });
+}
+const cleanHe=s=>s.replace(/[֑-ׇ]/g,"").replace(/[״"'.?!,:;־\-()…]/g,"").replace(/\s+/g," ").trim();
+function typeStep(item){
+  const w=item.w;
+  screen.innerHTML='<div class="sessionbar"><button class="btn ghost" id="quit">✕</button><div class="meter"><i style="width:'+Math.round(100*WS.i/WS.total)+'%"></i></div><span class="pill">'+(WS.i+1)+"/"+WS.total+'</span></div>'
+   +'<div class="card prompt-card"><span class="pill">⌨️ expert mode</span><div style="height:10px"></div>'
+   +'<div style="font-size:1.25rem;font-weight:800">'+esc(w.en)+'</div><div class="small">Type it in Hebrew</div>'
+   +'<input id="typein" class="he" dir="rtl" autocomplete="off" style="margin-top:14px;width:100%;padding:12px;font:inherit;font-size:1.15rem;font-weight:700;text-align:center;border:2px solid var(--edge);border-radius:14px;background:var(--card);color:var(--ink)">'
+   +'<button class="btn primary wide" id="checkbtn" style="margin-top:12px">Check ✔</button></div><div id="after"></div>';
+  $("#quit").onclick=()=>{ WS=null; renderPacks(); };
+  const input=$("#typein"); input.focus();
+  const submit=()=>{
+    const ok=cleanHe(input.value)===cleanHe(w.he);
+    input.disabled=true; $("#checkbtn").disabled=true;
+    input.style.background=ok?"var(--teal-soft)":"var(--accent-soft)";
+    blip(ok);
+    srsAnswer(item.id, ok);
+    ensureDaily(); S.daily.words++; save(); questCheck();
+    if(ok){ WS.right++; addXp(15); } else { WS.q.push(item); WS.total++; addXp(2); }
+    $("#after").innerHTML=(ok?"":'<div class="card center"><div class="big-he he">'+esc(w.he)+'</div><div class="small">the correct spelling</div></div>')
+      +'<div class="examplebox"><div class="he" style="font-size:1.05rem">'+esc(w.ex)+' <button class="tinybtn" id="playex">🔊</button></div><div class="small">'+esc(w.exEn)+'</div></div>'
+      +'<button class="btn primary wide" id="next" style="margin-top:12px">'+(ok?"+15 XP — Next ➜":"Try again later ➜")+'</button>';
+    say(w.he);
+    $("#playex").onclick=()=>say(w.ex);
+    $("#next").onclick=()=>{ WS.i++; wordStep(); };
+    $("#next").focus();
+  };
+  $("#checkbtn").onclick=submit;
+  input.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!input.disabled) submit(); });
+}
+function wordDone(){
+  const pct=Math.round(100*WS.right/WS.total);
+  screen.innerHTML='<div class="card prompt-card"><div class="result-big">'+(pct>=80?"🏆":pct>=50?"💪":"🌱")+'</div>'
+   +'<h1>'+WS.right+"/"+WS.total+' right</h1><p class="small">'+(pct>=80?"חבל על הזמן! Amazing!":pct>=50?"יפה מאוד! Keep going!":"לאט לאט — every try counts.")+'</p>'
+   +'<button class="btn primary wide" id="again">One more round 🔁</button><div style="height:10px"></div>'
+   +'<button class="btn wide" id="back">Back to packs</button></div>';
+  const packId=WS.packId; WS=null;
+  $("#again").onclick=()=>startWordSession(packId);
+  $("#back").onclick=renderPacks;
+}
+
+/* ================= stories ================= */
+function renderStories(){
+  screen.innerHTML='<h1>📖 סיפורים</h1>'
+  + STORIES.map(st=>{ const pr=S.storyProg[st.id]||{done:0};
+    return '<button class="card storycard" style="width:100%;text-align:inherit" data-story="'+st.id+'"><div class="semoji">'+st.emoji+'</div>'
+     +'<div style="flex:1"><div class="he" style="font-weight:900;font-size:1.2rem">'+st.title+'</div>'
+     +'<div class="small">'+st.titleEn+'</div>'
+     +'<div class="he small" style="margin-top:4px">'+st.blurb+'</div>'
+     +'<div style="height:6px"></div><div class="meter"><i style="width:'+Math.round(100*pr.done/st.chapters.length)+'%"></i></div>'
+     +'<div class="small">'+pr.done+"/"+st.chapters.length+" chapters</div></div></button>"; }).join("");
+  document.querySelectorAll("[data-story]").forEach(el=>el.onclick=()=>renderChapterList(el.dataset.story));
+}
+function renderChapterList(sid){
+  const st=STORIES.find(s=>s.id===sid), pr=S.storyProg[sid]||{done:0};
+  screen.innerHTML='<div class="backrow"><button class="btn ghost" id="back">← Stories</button></div>'
+  +'<h1 class="he">'+st.emoji+" "+st.title+'</h1>'
+  + st.chapters.map((ch,i)=>{
+    const locked=i>pr.done, done=i<pr.done;
+    return '<button class="card row" style="width:100%;text-align:inherit" '+(locked?"disabled":"")+' data-ch="'+i+'">'
+     +'<div style="font-size:1.5rem">'+(done?"✅":locked?"🔒":"▶️")+'</div>'
+     +'<div class="grow"><div class="he" style="font-weight:900">פרק '+(i+1)+": "+ch.title+'</div>'
+     +(locked?'<div class="small">Finish the previous chapter to unlock</div>':"")+"</div></button>"; }).join("");
+  $("#back").onclick=renderStories;
+  document.querySelectorAll("[data-ch]").forEach(el=>el.onclick=()=>readChapter(sid,+el.dataset.ch));
+}
+function glossify(he, story){
+  return he.split("*").map((seg,i)=> i%2
+    ? '<span class="gw" data-g="'+esc(seg)+'">'+esc(seg)+"</span>"
+    : esc(seg)).join("");
+}
+function plain(he){ return he.replace(/\*/g,""); }
+let glossT=null;
+document.addEventListener("click",e=>{
+  const gw=e.target.closest(".gw");
+  const pop=$("#glosspop");
+  if(gw){
+    const story=STORIES.find(s=>s.id===pop.dataset.sid);
+    const g=story&&story.gloss[gw.dataset.g];
+    pop.innerHTML='<span class="he">'+esc(gw.dataset.g)+"</span> — "+(g?esc(g):"?");
+    pop.style.display="block"; say(gw.dataset.g);
+    clearTimeout(glossT); glossT=setTimeout(()=>pop.style.display="none",3000);
+  }
+});
+function readChapter(sid, ci){
+  const st=STORIES.find(s=>s.id===sid), ch=st.chapters[ci];
+  $("#glosspop").dataset.sid=sid;
+  let shown=0;
+  screen.innerHTML='<div class="backrow"><button class="btn ghost" id="back">← '+esc(st.titleEn)+'</button></div>'
+   +'<h2 class="he">פרק '+(ci+1)+": "+ch.title+'</h2><div class="small" style="margin-bottom:12px">Tap 🔊 to hear · tap "EN" if you’re stuck · <b class="he" style="color:var(--accent)">pink words</b> are tappable</div>'
+   +'<div id="paras"></div><div id="tail"></div>';
+  $("#back").onclick=()=>renderChapterList(sid);
+  const parasEl=$("#paras"), tail=$("#tail");
+  function addPara(){
+    const p=ch.paras[shown];
+    const wrap=document.createElement("div");
+    wrap.className="para-wrap";
+    wrap.innerHTML='<p class="para he">'+glossify(p.he,st)+'</p>'
+     +'<div class="para-tools"><button class="tinybtn tts">🔊</button><button class="tinybtn en">EN</button></div>'
+     +'<p class="para-en">'+esc(p.en)+"</p>";
+    wrap.querySelector(".tts").onclick=()=>say(plain(p.he));
+    wrap.querySelector(".en").onclick=()=>wrap.classList.toggle("showen");
+    parasEl.appendChild(wrap);
+    ensureDaily(); S.daily.paras++; save(); questCheck();
+    shown++;
+    paintTail();
+    wrap.scrollIntoView({behavior:"smooth", block:"end"});
+  }
+  function paintTail(){
+    if(shown<ch.paras.length){
+      tail.innerHTML='<button class="btn teal wide" id="more">המשך ➜ Continue</button>';
+      $("#more").onclick=addPara;
+    } else if(ch.choice && !tail.dataset.chose){
+      tail.innerHTML='<div class="choicebox"><div class="he" style="font-weight:900;font-size:1.1rem">🤔 '+esc(ch.choice.he)+'</div><div class="small">'+esc(ch.choice.en)+'</div><div class="opts">'
+       + ch.choice.options.map((o,i)=>'<button class="opt he" data-i="'+i+'">'+esc(o.he)+'</button>').join("")+"</div></div>";
+      tail.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+        const o=ch.choice.options[+b.dataset.i];
+        tail.dataset.chose="1";
+        const wrap=document.createElement("div");
+        wrap.className="para-wrap";
+        wrap.innerHTML='<p class="para he" style="background:var(--sun-soft)">'+esc(o.replyHe)+'</p><div class="para-tools"><button class="tinybtn tts">🔊</button><button class="tinybtn en">EN</button></div><p class="para-en">'+esc(o.replyEn)+"</p>";
+        wrap.querySelector(".tts").onclick=()=>say(o.replyHe);
+        wrap.querySelector(".en").onclick=()=>wrap.classList.toggle("showen");
+        parasEl.appendChild(wrap);
+        addXp(5); paintTail();
+      });
+    } else {
+      tail.innerHTML='<button class="btn primary wide" id="toquiz">🧠 שאלות! Quiz time</button>';
+      $("#toquiz").onclick=()=>runQuiz(sid,ci);
+    }
+  }
+  addPara(); if(ch.paras[0]) say(plain(ch.paras[0].he));
+}
+function runQuiz(sid, ci){
+  const st=STORIES.find(s=>s.id===sid), ch=st.chapters[ci];
+  let qi=0, right=0;
+  function step(){
+    if(qi>=ch.quiz.length) return doneQuiz();
+    const q=ch.quiz[qi];
+    const opts=shuffle(q.opts.map((o,i)=>({o,ok:i===q.a})));
+    screen.innerHTML='<div class="sessionbar"><span class="pill">שאלה '+(qi+1)+"/"+ch.quiz.length+'</span><div class="meter"><i style="width:'+Math.round(100*qi/ch.quiz.length)+'%"></i></div></div>'
+     +'<div class="card prompt-card"><div class="he" style="font-size:1.25rem;font-weight:800;line-height:1.6">'+esc(q.q)+'</div></div>'
+     +'<div class="opts">'+opts.map((x,i)=>'<button class="opt he" data-i="'+i+'">'+esc(x.o)+'</button>').join("")+'</div><div id="after"></div>';
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      const x=opts[+b.dataset.i];
+      document.querySelectorAll(".opt").forEach((bb,i)=>{ bb.disabled=true; if(opts[i].ok) bb.classList.add(x.ok?"correct":"reveal"); });
+      if(!x.ok) b.classList.add("wrong");
+      blip(x.ok);
+      if(x.ok){ right++; addXp(15); }
+      $("#after").innerHTML='<button class="btn primary wide" style="margin-top:12px" id="next">➜</button>';
+      $("#next").onclick=()=>{ qi++; step(); };
+    });
+  }
+  function doneQuiz(){
+    const pass=right>=Math.ceil(ch.quiz.length*2/3);
+    if(pass){
+      const pr=S.storyProg[sid]||{done:0};
+      if(ci>=pr.done){ pr.done=ci+1; S.storyProg[sid]=pr; addXp(40); save(); }
+      if(pr.done===st.chapters.length) confetti();
+      checkBadges();
+    }
+    screen.innerHTML='<div class="card prompt-card"><div class="result-big">'+(pass?"🎉":"🔁")+'</div>'
+     +'<h1>'+right+"/"+ch.quiz.length+'</h1>'
+     +'<p class="small">'+(pass?"פרק הושלם! Chapter complete (+40 XP)":"כמעט! Read the chapter once more — you’ve got this.")+'</p>'
+     +(pass?'<button class="btn primary wide" id="go">'+(ci+1<st.chapters.length?"Next chapter ➜":"Back to stories 🏁")+"</button>"
+           :'<button class="btn primary wide" id="go">Re-read chapter</button>')
+     +'</div>';
+    $("#go").onclick=()=>{ if(!pass) readChapter(sid,ci); else if(ci+1<st.chapters.length) readChapter(sid,ci+1); else renderStories(); };
+  }
+  step();
+}
+
+/* ================= speak ================= */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+/* embeds (like the artifact viewer) can deny mic via permissions policy — detect up front */
+const FPOL=document.permissionsPolicy||document.featurePolicy;
+const MIC_OK=!!SR && !(FPOL && !FPOL.allowsFeature("microphone"));
+function norm(s){
+  return s.replace(/[֑-ׇ]/g,"").replace(/[״"'.,!?;:־\-()]/g," ")
+    .replace(/ך/g,"כ").replace(/ם/g,"מ").replace(/ן/g,"נ").replace(/ף/g,"פ").replace(/ץ/g,"צ")
+    .split(/\s+/).filter(Boolean);
+}
+function simScore(a,b){
+  const A=norm(a), B=new Set(norm(b));
+  if(!A.length||!B.size) return 0;
+  const hit=A.filter(w=>B.has(w)).length;
+  return hit/Math.max(A.length,B.size);
+}
+function renderSpeakLevels(){
+  screen.innerHTML='<h1>🎤 דיבור</h1><p class="small">Say the sentence OUT LOUD in Hebrew before revealing the answer. That’s where fluency comes from.</p>'
+  +(SR&&!MIC_OK?'<p class="small">ℹ️ The mic game is off here because this viewer blocks microphone access — saying it out loud + self-check trains you just as well.</p>':"")
+  + SPEAK_LEVELS.map(lv=>'<button class="card row" style="width:100%;text-align:inherit" data-lv="'+lv.id+'"><div style="font-size:1.8rem">'+lv.icon+'</div><div class="grow"><div class="he" style="font-weight:900;font-size:1.15rem">'+lv.name+'</div><div class="small">'+lv.nameEn+"</div></div><div>➜</div></button>").join("");
+  document.querySelectorAll("[data-lv]").forEach(el=>el.onclick=()=>startSpeak(el.dataset.lv));
+}
+let SP=null;
+function startSpeak(lvId){
+  const lv=SPEAK_LEVELS.find(l=>l.id===lvId);
+  const pool=lv.items.map((it,i)=>({it, id:"s:"+lv.id+":"+i}));
+  const due=pool.filter(x=>isDue(x.id)), fresh=pool.filter(x=>isNew(x.id));
+  let q=shuffle(due).slice(0,8);
+  if(q.length<8) q=q.concat(shuffle(fresh).slice(0,8-q.length));
+  if(q.length<8) q=q.concat(shuffle(pool.filter(x=>!q.includes(x))).slice(0,8-q.length));
+  SP={lv, q:shuffle(q).slice(0,8), i:0};
+  speakStep();
+}
+function speakStep(){
+  if(SP.i>=SP.q.length) return speakDone();
+  const {it,id}=SP.q[SP.i];
+  screen.innerHTML='<div class="sessionbar"><button class="btn ghost" id="quit">✕</button><div class="meter"><i style="width:'+Math.round(100*SP.i/SP.q.length)+'%"></i></div><span class="pill">'+(SP.i+1)+"/"+SP.q.length+'</span></div>'
+   +'<div class="card prompt-card"><div class="eyebrow">Say it in Hebrew — out loud!</div><div style="height:8px"></div>'
+   +'<div style="font-size:1.25rem;font-weight:800;line-height:1.5">'+esc(it.en)+'</div>'
+   +'<div style="height:14px"></div><div class="row" style="justify-content:center">'
+   +(MIC_OK?'<button class="btn" id="micbtn">🎙️ Say it to the mic</button>':"")
+   +'<button class="btn teal" id="reveal">Show answer 👀</button></div>'
+   +'<div id="micout" class="small" style="margin-top:10px"></div></div>'
+   +'<div id="answer"></div>';
+  $("#quit").onclick=()=>{ SP=null; renderSpeakLevels(); };
+  let micBonus=false;
+  if(MIC_OK){
+    $("#micbtn").onclick=async()=>{
+      const out=$("#micout"), btn=$("#micbtn");
+      /* ask for the mic explicitly first: SpeechRecognition inside an embedded page
+         often fails silently unless permission was granted via getUserMedia */
+      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+        out.textContent="Requesting microphone…";
+        try{ (await navigator.mediaDevices.getUserMedia({audio:true})).getTracks().forEach(t=>t.stop()); }
+        catch(err){
+          out.textContent=(err && (err.name==="NotAllowedError"||err.name==="SecurityError"))
+            ? "🚫 Microphone is blocked. Tap the 🔒 (or mic icon) in the address bar, allow the microphone, then try again."
+            : "🚫 No working microphone found on this device.";
+          return;
+        }
+      }
+      const r=new SR(); r.lang="he-IL"; r.interimResults=false; r.maxAlternatives=3; r.continuous=false;
+      btn.classList.add("listening"); out.textContent="🔴 Listening... דברי עכשיו!";
+      let got=false;
+      r.onresult=e=>{
+        got=true;
+        /* take the best-matching of the engine's alternatives */
+        let best={heard:"",sc:0};
+        for(const alt of e.results[0]){ const sc=simScore(it.he, alt.transcript); if(sc>=best.sc) best={heard:alt.transcript, sc}; }
+        btn.classList.remove("listening");
+        out.innerHTML='I heard: <b class="he">'+esc(best.heard)+"</b> ";
+        if(best.sc>=0.5){ micBonus=true; blip(true); out.innerHTML+='<span class="pill">🎯 Great match! +5 bonus</span>'; }
+        else out.innerHTML+='<span class="pill">Close-ish — check the answer, then say it again</span>';
+      };
+      r.onerror=e=>{
+        btn.classList.remove("listening");
+        const msgs={
+          "not-allowed":"🚫 Microphone permission is blocked for this site. Allow it via the 🔒 icon in the address bar and retry.",
+          "service-not-allowed":"🚫 This browser refuses speech recognition here — Chrome or Edge works best. Self-check still counts!",
+          "no-speech":"🤫 Didn't hear anything — tap the mic and speak right away.",
+          "audio-capture":"🚫 No microphone found on this device.",
+          "network":"📡 Speech recognition needs an internet connection.",
+          "aborted":"Stopped listening."};
+        out.textContent=msgs[e.error]||("Mic error ("+e.error+") — you can still self-check.");
+      };
+      r.onend=()=>{ btn.classList.remove("listening"); if(!got && out.textContent.startsWith("🔴")) out.textContent="🤫 Didn't catch anything — tap and speak right after."; };
+      try{ r.start(); }catch(err){ btn.classList.remove("listening"); out.textContent="Couldn't start the mic ("+err.message+") — self-check instead."; }
+    };
+  } else {
+    /* no SpeechRecognition API at all (e.g. Firefox) — leave no dead UI */
+  }
+  $("#reveal").onclick=()=>{
+    say(it.he);
+    $("#answer").innerHTML='<div class="card center"><div class="big-he he">'+esc(it.he)+'</div>'
+     +'<button class="tinybtn" id="again2">🔊 hear it again</button>'
+     +'<div class="small" style="margin:8px 0 12px">Now say it out loud once more, matching the voice. How did you do?</div>'
+     +'<div class="grade3">'
+     +'<button class="btn" id="g0">😅 Not yet</button>'
+     +'<button class="btn sun" id="g1">🙂 Almost</button>'
+     +'<button class="btn teal" id="g2">😎 Nailed it</button></div></div>';
+    $("#again2").onclick=()=>say(it.he);
+    const grade=ok=>{
+      srsAnswer(id, ok>=1);
+      S.spokenCount++; ensureDaily(); S.daily.speaks++; save(); questCheck(); checkBadges();
+      addXp(ok===2?10:ok===1?6:2);
+      if(micBonus) addXp(5);
+      if(ok===0){ SP.q.push(SP.q[SP.i]); }
+      SP.i++; speakStep();
+    };
+    $("#g0").onclick=()=>grade(0); $("#g1").onclick=()=>grade(1); $("#g2").onclick=()=>grade(2);
+  };
+}
+function speakDone(){
+  screen.innerHTML='<div class="card prompt-card"><div class="result-big">🎤</div><h1>Session done!</h1>'
+   +'<p class="small he" style="font-size:1rem">כל משפט שאמרת בקול — נשאר איתך.</p>'
+   +'<button class="btn primary wide" id="again">Another round 🔁</button><div style="height:10px"></div>'
+   +'<button class="btn wide" id="back">Back</button></div>';
+  const lvId=SP.lv.id; SP=null;
+  $("#again").onclick=()=>startSpeak(lvId);
+  $("#back").onclick=renderSpeakLevels;
+}
+
+/* ================= quests ================= */
+function questCheck(){
+  const d=S.daily;
+  if(!d.q1&&d.words>=10){ d.q1=true; save(); addXp(20); toast("✅ Quest complete: 10 words! +20 XP"); }
+  if(!d.q2&&d.paras>=7){ d.q2=true; save(); addXp(20); toast("✅ Quest complete: story reading! +20 XP"); }
+  if(!d.q3&&d.speaks>=5){ d.q3=true; save(); addXp(20); toast("✅ Quest complete: 5 spoken! +20 XP"); }
+}
+
+/* ================= boot ================= */
+ensureDaily(); paintTop(); render();
+</script>
+
+</body>
+</html>
