@@ -672,6 +672,44 @@ const TTS_FIX = {
 };
 </script>
 
+<script id="speech-utils">
+/* Pure speech-comparison helpers (no DOM) — unit-tested by check.js. */
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  let prev=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){ const cur=[i];
+    for(let j=1;j<=n;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    prev=cur; }
+  return prev[n];
+}
+function normWord(s){
+  return s.replace(/[֑-ׇ]/g,"").replace(/[״"'.?!,:;־\-()…]/g,"")
+    .replace(/ך/g,"כ").replace(/ם/g,"מ").replace(/ן/g,"נ").replace(/ף/g,"פ").replace(/ץ/g,"צ").trim();
+}
+/* Compare a spoken transcript against the target sentence, word by word.
+   Returns per-word marks on the TARGET (2 = perfect, 1 = close, 0 = missing/wrong),
+   the extra words heard that matched nothing, and a 0..1 score. */
+function alignWords(target, heard){
+  const orig=target.split(/\s+/).filter(Boolean);
+  const T=orig.map(normWord);
+  const H=(heard||"").split(/\s+/).map(normWord).filter(Boolean);
+  const used=new Array(H.length).fill(false);
+  const marks=orig.map((w,i)=>{
+    const t=T[i];
+    if(!t) return {w,m:2};
+    let j=H.findIndex((h,k)=>!used[k]&&h===t);
+    if(j>=0){ used[j]=true; return {w,m:2}; }
+    const tol=t.length>=5?2:1;
+    j=H.findIndex((h,k)=>!used[k]&&h&&lev(h,t)<=tol);
+    if(j>=0){ used[j]=true; return {w,m:1}; }
+    return {w,m:0};
+  });
+  const scorable=marks.filter((x,i)=>T[i]);
+  const score=scorable.length? scorable.reduce((s,x)=>s+(x.m===2?1:x.m===1?0.6:0),0)/scorable.length : 0;
+  return {marks, extra:H.filter((h,k)=>!used[k]), score};
+}
+</script>
+
 <script id="app-logic">
 "use strict";
 /* ================= state ================= */
@@ -1084,17 +1122,6 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
 /* embeds (like the artifact viewer) can deny mic via permissions policy — detect up front */
 const FPOL=document.permissionsPolicy||document.featurePolicy;
 const MIC_OK=!!SR && !(FPOL && !FPOL.allowsFeature("microphone"));
-function norm(s){
-  return s.replace(/[֑-ׇ]/g,"").replace(/[״"'.,!?;:־\-()]/g," ")
-    .replace(/ך/g,"כ").replace(/ם/g,"מ").replace(/ן/g,"נ").replace(/ף/g,"פ").replace(/ץ/g,"צ")
-    .split(/\s+/).filter(Boolean);
-}
-function simScore(a,b){
-  const A=norm(a), B=new Set(norm(b));
-  if(!A.length||!B.size) return 0;
-  const hit=A.filter(w=>B.has(w)).length;
-  return hit/Math.max(A.length,B.size);
-}
 function renderSpeakLevels(){
   screen.innerHTML='<h1>🎤 דיבור</h1><p class="small">Say the sentence OUT LOUD in Hebrew before revealing the answer. That’s where fluency comes from.</p>'
   +(SR&&!MIC_OK?'<p class="small">ℹ️ The mic game is off here because this viewer blocks microphone access — saying it out loud + self-check trains you just as well.</p>':"")
@@ -1124,52 +1151,91 @@ function speakStep(){
    +'<div id="micout" class="small" style="margin-top:10px"></div></div>'
    +'<div id="answer"></div>';
   $("#quit").onclick=()=>{ SP=null; renderSpeakLevels(); };
-  let micBonus=false;
-  if(MIC_OK){
-    $("#micbtn").onclick=async()=>{
-      const out=$("#micout"), btn=$("#micbtn");
-      /* ask for the mic explicitly first: SpeechRecognition inside an embedded page
-         often fails silently unless permission was granted via getUserMedia */
-      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-        out.textContent="Requesting microphone…";
-        try{ (await navigator.mediaDevices.getUserMedia({audio:true})).getTracks().forEach(t=>t.stop()); }
-        catch(err){
-          out.textContent=(err && (err.name==="NotAllowedError"||err.name==="SecurityError"))
-            ? "🚫 Microphone is blocked. Tap the 🔒 (or mic icon) in the address bar, allow the microphone, then try again."
-            : "🚫 No working microphone found on this device.";
+  let graded=false;
+  function recordGrade(okEnough, xp){
+    if(graded) return; graded=true;
+    srsAnswer(id, okEnough);
+    S.spokenCount++; ensureDaily(); S.daily.speaks++; save(); questCheck(); checkBadges();
+    addXp(xp);
+    if(!okEnough) SP.q.push(SP.q[SP.i]);
+  }
+  function showMicResult(heard){
+    const {marks, extra, score}=alignWords(it.he, heard);
+    const pct=Math.round(score*100);
+    const colored=marks.map(x=>'<span style="font-weight:900;color:'+(x.m===2?"var(--good)":x.m===1?"#E8960C":"var(--bad)")+'">'+esc(x.w)+"</span>").join(" ");
+    let label, xp;
+    if(score>=0.8){ label="😎 מעולה! "+pct+"% · +15 XP"; xp=15; blip(true); }
+    else if(score>=0.5){ label="🙂 כמעט! "+pct+"% · +8 XP"; xp=8; blip(true); }
+    else { label="😅 עוד ניסיון · "+pct+"% · +3 XP"; xp=3; blip(false); }
+    recordGrade(score>=0.5, xp);
+    if($("#reveal")) $("#reveal").classList.add("hidden");
+    $("#answer").innerHTML='<div class="card center">'
+     +'<div style="font-weight:900;font-size:1.1rem">'+label+'</div><div style="height:10px"></div>'
+     +'<div class="big-he he" style="font-size:1.5rem">'+colored+'</div>'
+     +'<div class="small" style="margin-top:6px">🟢 perfect · 🟠 close · 🔴 missing or wrong</div>'
+     +'<div class="small he" style="margin-top:8px">שמעתי: „'+esc(heard)+'”</div>'
+     +(extra.length?'<div class="small he">מילים מיותרות: '+esc(extra.join(", "))+'</div>':"")
+     +'<button class="tinybtn" id="hearit">🔊 hear the correct version</button>'
+     +'<div class="row" style="margin-top:10px"><button class="btn" id="retry">🎙️ Try again</button><button class="btn primary grow" id="mnext">Next ➜</button></div>'
+     +(graded?'<div class="small" style="margin-top:6px">Retries are practice — the first take was graded.</div>':"")+'</div>';
+    say(it.he);
+    $("#hearit").onclick=()=>say(it.he);
+    $("#retry").onclick=listen;
+    $("#mnext").onclick=()=>{ SP.i++; speakStep(); };
+  }
+  async function listen(){
+    const out=$("#micout"), btn=$("#micbtn");
+    /* explicit permission first: SpeechRecognition often fails silently without it */
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+      out.textContent="Requesting microphone…";
+      try{ (await navigator.mediaDevices.getUserMedia({audio:true})).getTracks().forEach(t=>t.stop()); }
+      catch(err){
+        out.textContent=(err && (err.name==="NotAllowedError"||err.name==="SecurityError"))
+          ? "🚫 Microphone is blocked. Tap the 🔒 (or mic icon) in the address bar, allow the microphone, then try again."
+          : "🚫 No working microphone found on this device.";
+        return;
+      }
+    }
+    const r=new SR(); r.lang="he-IL"; r.interimResults=true; r.maxAlternatives=5; r.continuous=false;
+    btn.classList.add("listening"); out.textContent="🔴 מקשיבה... say the whole sentence!";
+    let finalDone=false, lastInterim="";
+    r.onresult=e=>{
+      let interim="";
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const res=e.results[i];
+        if(res.isFinal){
+          finalDone=true;
+          let best={h:res[0].transcript, sc:-1};
+          for(const alt of res){ const sc=alignWords(it.he, alt.transcript).score; if(sc>best.sc) best={h:alt.transcript, sc}; }
+          btn.classList.remove("listening");
+          try{ r.stop(); }catch(_){}
+          showMicResult(best.h.trim());
           return;
         }
+        interim+=res[0].transcript;
       }
-      const r=new SR(); r.lang="he-IL"; r.interimResults=false; r.maxAlternatives=3; r.continuous=false;
-      btn.classList.add("listening"); out.textContent="🔴 Listening... דברי עכשיו!";
-      let got=false;
-      r.onresult=e=>{
-        got=true;
-        /* take the best-matching of the engine's alternatives */
-        let best={heard:"",sc:0};
-        for(const alt of e.results[0]){ const sc=simScore(it.he, alt.transcript); if(sc>=best.sc) best={heard:alt.transcript, sc}; }
-        btn.classList.remove("listening");
-        out.innerHTML='I heard: <b class="he">'+esc(best.heard)+"</b> ";
-        if(best.sc>=0.5){ micBonus=true; blip(true); out.innerHTML+='<span class="pill">🎯 Great match! +5 bonus</span>'; }
-        else out.innerHTML+='<span class="pill">Close-ish — check the answer, then say it again</span>';
-      };
-      r.onerror=e=>{
-        btn.classList.remove("listening");
-        const msgs={
-          "not-allowed":"🚫 Microphone permission is blocked for this site. Allow it via the 🔒 icon in the address bar and retry.",
-          "service-not-allowed":"🚫 This browser refuses speech recognition here — Chrome or Edge works best. Self-check still counts!",
-          "no-speech":"🤫 Didn't hear anything — tap the mic and speak right away.",
-          "audio-capture":"🚫 No microphone found on this device.",
-          "network":"📡 Speech recognition needs an internet connection.",
-          "aborted":"Stopped listening."};
-        out.textContent=msgs[e.error]||("Mic error ("+e.error+") — you can still self-check.");
-      };
-      r.onend=()=>{ btn.classList.remove("listening"); if(!got && out.textContent.startsWith("🔴")) out.textContent="🤫 Didn't catch anything — tap and speak right after."; };
-      try{ r.start(); }catch(err){ btn.classList.remove("listening"); out.textContent="Couldn't start the mic ("+err.message+") — self-check instead."; }
+      if(interim){ lastInterim=interim; out.innerHTML='🔴 <span class="he">'+esc(interim)+"</span>"; }
     };
-  } else {
-    /* no SpeechRecognition API at all (e.g. Firefox) — leave no dead UI */
+    r.onerror=e=>{
+      btn.classList.remove("listening");
+      const msgs={
+        "not-allowed":"🚫 Microphone permission is blocked for this site. Allow it via the 🔒 icon in the address bar and retry.",
+        "service-not-allowed":"🚫 This browser refuses speech recognition — Chrome or Edge works best. Self-check still counts!",
+        "no-speech":"🤫 Didn't hear anything — tap the mic and start speaking right away.",
+        "audio-capture":"🚫 No microphone found on this device.",
+        "network":"📡 Speech recognition needs an internet connection.",
+        "aborted":""};
+      const m=msgs[e.error]!==undefined?msgs[e.error]:("Mic error ("+e.error+") — you can still self-check.");
+      if(m) out.textContent=m;
+    };
+    r.onend=()=>{
+      btn.classList.remove("listening");
+      if(!finalDone && lastInterim) showMicResult(lastInterim.trim());
+      else if(!finalDone && out.textContent.startsWith("🔴")) out.textContent="🤫 Didn't catch anything — tap and speak right after.";
+    };
+    try{ r.start(); }catch(err){ btn.classList.remove("listening"); out.textContent="Couldn't start the mic ("+err.message+") — self-check instead."; }
   }
+  if(MIC_OK) $("#micbtn").onclick=listen;
   $("#reveal").onclick=()=>{
     say(it.he);
     $("#answer").innerHTML='<div class="card center"><div class="big-he he">'+esc(it.he)+'</div>'
@@ -1181,11 +1247,7 @@ function speakStep(){
      +'<button class="btn teal" id="g2">😎 Nailed it</button></div></div>';
     $("#again2").onclick=()=>say(it.he);
     const grade=ok=>{
-      srsAnswer(id, ok>=1);
-      S.spokenCount++; ensureDaily(); S.daily.speaks++; save(); questCheck(); checkBadges();
-      addXp(ok===2?10:ok===1?6:2);
-      if(micBonus) addXp(5);
-      if(ok===0){ SP.q.push(SP.q[SP.i]); }
+      recordGrade(ok>=1, ok===2?10:ok===1?6:2);
       SP.i++; speakStep();
     };
     $("#g0").onclick=()=>grade(0); $("#g1").onclick=()=>grade(1); $("#g2").onclick=()=>grade(2);
