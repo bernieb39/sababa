@@ -993,13 +993,40 @@ function pickVoice(){
 }
 if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
 let ttsWarned=false;
-function say(text, rate){
+function sayDevice(text, rate){
   if(!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(TTS_FIX[text]||text);
   if(VOICE) u.voice=VOICE; u.lang="he-IL"; u.rate=rate||0.92;
   if(!VOICE && !ttsWarned){ ttsWarned=true; toast("Tip: no Hebrew voice installed on this device — audio may sound off."); }
   speechSynthesis.speak(u);
+}
+/* Natural neural audio, pre-generated per text into audio/<fnv1a>.mp3 (see gen-audio.js).
+   Falls back to the device voice if a clip is missing or playback fails. */
+function fnv1a(s){
+  let h=0x811c9dc5;
+  for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*0x01000193)>>>0; }
+  return h.toString(16).padStart(8,"0");
+}
+const audioCache={};
+let currentClip=null;
+function say(text, rate){
+  const url="audio/"+fnv1a(text)+".mp3";
+  let fell=false;
+  const fallback=()=>{ if(!fell){ fell=true; sayDevice(text, rate); } };
+  if(audioCache[url]==="missing") return fallback();
+  try{
+    if(currentClip){ currentClip.pause(); currentClip.currentTime=0; }
+    if("speechSynthesis" in window) speechSynthesis.cancel();
+    let a=audioCache[url];
+    if(!a){ a=new Audio(url); a.preload="auto"; audioCache[url]=a; }
+    a.onerror=()=>{ audioCache[url]="missing"; fallback(); };
+    a.playbackRate=rate?rate:1;
+    a.currentTime=0;
+    currentClip=a;
+    const p=a.play();
+    if(p&&p.catch) p.catch(err=>{ if(err&&err.name!=="AbortError") fallback(); });
+  }catch(e){ fallback(); }
 }
 let AC=null;
 function blip(ok){
